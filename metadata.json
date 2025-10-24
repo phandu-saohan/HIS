@@ -1,0 +1,8 @@
+{
+  "name": "Trình quản lý Bệnh viện Thông minh",
+  "description": "Một ứng dụng web React hiện đại để quản lý các hoạt động của bệnh viện, bao gồm quản lý bệnh nhân, nhân viên, lịch hẹn và một công cụ kiểm tra triệu chứng được hỗ trợ bởi AI.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
