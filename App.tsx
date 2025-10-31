@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -30,14 +30,15 @@ import PatientDetail from './components/PatientDetail';
 
 // Types and mock data
 import { type UserRole, type Patient, type FinancialRecord, type OutpatientVisit, type Medication, type MedicationCategory, type Supplier, type LabTest, type RadiologyExam, type InpatientRecord, type Appointment, type TelemedicineSession } from './types';
-import { mockPatients, mockFinancialRecords, mockOutpatientVisits, mockMedications, mockMedicationCategories, mockSuppliers, mockLabTests, mockRadiologyExams, mockServiceItems, mockInpatientRecords, mockAppointments, mockDoctors, mockDepartments, mockTelemedicineSessions } from './data/mockData';
+import { mockFinancialRecords, mockOutpatientVisits, mockMedications, mockMedicationCategories, mockSuppliers, mockLabTests, mockRadiologyExams, mockServiceItems, mockInpatientRecords, mockAppointments, mockDoctors, mockDepartments, mockTelemedicineSessions } from './data/mockData';
+import { getPatients, addPatient, updatePatient, deletePatient } from './services/firebaseService';
 
 const App: React.FC = () => {
-    const [activeComponent, setActiveComponent] = useState<string>('ServiceBilling');
+    const [activeComponent, setActiveComponent] = useState<string>('PatientRegistration');
     const [currentUserRole, setCurrentUserRole] = useState<UserRole>('Bác sĩ/Y sĩ');
     
     // State for data that can be modified
-    const [patients, setPatients] = useState<Patient[]>(mockPatients);
+    const [patients, setPatients] = useState<Patient[]>([]);
     const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>(mockFinancialRecords);
     const [opdVisits, setOpdVisits] = useState<OutpatientVisit[]>(mockOutpatientVisits);
     const [inpatientRecords, setInpatientRecords] = useState<InpatientRecord[]>(mockInpatientRecords);
@@ -51,21 +52,33 @@ const App: React.FC = () => {
     
     const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
 
+    useEffect(() => {
+        const fetchPatients = async () => {
+            const patientData = await getPatients();
+            setPatients(patientData);
+        };
+        fetchPatients();
+    }, []);
+
     // Handlers to modify state from child components
-    const handleAddPatient = (patientData: Omit<Patient, 'id' | 'avatar'>) => {
-        const newPatient: Patient = {
+    const handleAddPatient = async (patientData: Omit<Patient, 'id' | 'avatar'>) => {
+        const newPatientData = {
             ...patientData,
-            id: `P${Date.now().toString().slice(-4)}`,
             avatar: `https://picsum.photos/seed/${Date.now()}/40/40`,
         };
+        const newPatientId = await addPatient(newPatientData);
+        const newPatient = { ...newPatientData, id: newPatientId };
         setPatients(prev => [newPatient, ...prev]);
     };
 
-    const handleUpdatePatient = (updatedPatient: Patient) => {
+    const handleUpdatePatient = async (updatedPatient: Patient) => {
+        const { id, ...patientData } = updatedPatient;
+        await updatePatient(id, patientData);
         setPatients(prev => prev.map(p => p.id === updatedPatient.id ? updatedPatient : p));
     };
     
-    const handleDeletePatient = (patientId: string) => {
+    const handleDeletePatient = async (patientId: string) => {
+        await deletePatient(patientId);
         setPatients(prev => prev.filter(p => p.id !== patientId));
     };
 
