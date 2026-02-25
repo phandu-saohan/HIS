@@ -11,6 +11,18 @@ export type UserRole =
   | 'Quản lý'
   | 'Quản trị Hệ thống';
 
+export interface User {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: string;
+  departmentId: string;
+  status: 'Hoạt động' | 'Khóa';
+  lastLogin: string;
+}
+
 export interface Bed {
   id: string;
   ward: string;
@@ -416,6 +428,35 @@ export interface Permission {
     id: string;
     description: string;
     granted: boolean;
+}
+
+// --- Digital Signature & Audit Trail (Thông tư 46/2018/TT-BYT) ---
+
+export interface DocumentVersion {
+    id: string;
+    documentId: string; // Link to EMR visit, prescription, etc.
+    documentType: string; // e.g., 'Bệnh án nội khoa', 'Phiếu chăm sóc'
+    versionNumber: number;
+    contentJson: string; // JSON stringified content
+    hashValue: string; // SHA-256 hash
+    createdAt: string;
+    status: 'DRAFT' | 'SIGNED' | 'VOID';
+    isDeleted: boolean;
+    deletedReason?: string;
+    deletedBy?: string;
+}
+
+export interface SignatureLog {
+    id: string;
+    versionId: string; // Foreign Key to DocumentVersion
+    signerId: string; // ID of Doctor/Nurse
+    signerName: string;
+    signatureValue: string; // Base64 signature
+    certSerial: string; // Certificate Serial Number
+    signingTime: string; // Timestamp
+    ipAddress: string;
+    signatureType: 'INDIVIDUAL' | 'ORGANIZATION';
+    tsaTimestamp?: string; // Timestamp Authority
 }
 export interface Role {
     id: string;

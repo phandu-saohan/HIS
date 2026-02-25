@@ -69,9 +69,11 @@ const allMenuItems = {
     ],
     'Quản lý & Vận hành': [
         { id: 'HRManagement', label: 'Quản lý Nhân sự (HRM)', icon: <BriefcaseIcon/> },
+        { id: 'UserDepartmentManagement', label: 'Người dùng & Phân quyền', icon: <UserGroupIcon/> },
         { id: 'FacilityManagement', label: 'Quản lý Khoa/Phòng', icon: <OfficeBuildingIcon/> },
         { id: 'QualityManagement', label: 'Quản lý Chất lượng', icon: <StarIcon/> },
         { id: 'SecurityManagement', label: 'Bảo mật & Phân quyền', icon: <LockClosedIcon/> },
+        { id: 'DigitalSignatureLogs', label: 'Chữ ký số & Lưu vết', icon: <ShieldCheckIcon/> },
         { id: 'BusinessProcessFlow', label: 'Quy trình Nghiệp vụ', icon: <ArrowTrendingUpIcon /> },
     ],
     'Tương tác Bệnh nhân': [
@@ -90,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeComponent, setActiveComponent, 
         'Dược sĩ/Thủ kho': ['PharmacyManagement', 'InventoryManagement'],
         'Kỹ thuật viên Xét nghiệm': ['LIS'],
         'Kỹ thuật viên Chẩn đoán Hình ảnh': ['RISPACS'],
-        'Nhân viên Nhân sự (HR)': ['HRManagement'],
+        'Nhân viên Nhân sự (HR)': ['HRManagement', 'UserDepartmentManagement'],
         'Trưởng khoa/Người duyệt': Object.values(allMenuItems).flat().map(i => i.id).concat(['PatientDetail']), // Can see most things
         'Quản lý': Object.values(allMenuItems).flat().map(i => i.id).concat(['PatientDetail']), // Can see almost everything
         'Quản trị Hệ thống': Object.values(allMenuItems).flat().map(i => i.id).concat(['PatientDetail']), // Can see everything

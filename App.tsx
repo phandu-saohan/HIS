@@ -20,6 +20,7 @@ import PharmacyManagement from './components/PharmacyManagement';
 import InventoryManagement from './components/InventoryManagement';
 import AssetManagement from './components/AssetManagement';
 import HRManagement from './components/HRManagement';
+import UserDepartmentManagement from './components/UserDepartmentManagement';
 import FacilityManagement from './components/FacilityManagement';
 import QualityManagement from './components/QualityManagement';
 import SecurityManagement from './components/SecurityManagement';
@@ -27,11 +28,12 @@ import BusinessProcessFlow from './components/BusinessProcessFlow';
 import PatientPortal from './components/PatientPortal';
 import Telemedicine from './components/Telemedicine';
 import PatientDetail from './components/PatientDetail';
+import DigitalSignatureLogs from './components/DigitalSignatureLogs';
 
 // Types and mock data
 import { type UserRole, type Patient, type FinancialRecord, type OutpatientVisit, type Medication, type MedicationCategory, type Supplier, type LabTest, type RadiologyExam, type InpatientRecord, type Appointment, type TelemedicineSession } from './types';
 import { mockFinancialRecords, mockOutpatientVisits, mockMedications, mockMedicationCategories, mockSuppliers, mockLabTests, mockRadiologyExams, mockServiceItems, mockInpatientRecords, mockAppointments, mockDoctors, mockDepartments, mockTelemedicineSessions } from './data/mockData';
-import { getPatients, addPatient, updatePatient, deletePatient } from './services/firebaseService';
+import { getPatients, addPatient, updatePatient, deletePatient } from './services/supabaseService';
 
 const App: React.FC = () => {
     const [activeComponent, setActiveComponent] = useState<string>('PatientRegistration');
@@ -164,7 +166,12 @@ const App: React.FC = () => {
     const renderActiveComponent = () => {
         // Handle patient detail view separately
         if (activeComponent === 'PatientDetail' && viewingPatient) {
-            return <PatientDetail patient={viewingPatient} onBack={() => setActiveComponent('PatientRegistration')} />;
+            return <PatientDetail 
+                patient={viewingPatient} 
+                onBack={() => setActiveComponent('PatientRegistration')} 
+                opdVisits={opdVisits.filter(v => v.patientId === viewingPatient.id)}
+                inpatientRecords={inpatientRecords.filter(r => r.patientId === viewingPatient.id)}
+            />;
         }
 
         switch (activeComponent) {
@@ -211,9 +218,11 @@ const App: React.FC = () => {
             case 'InventoryManagement': return <InventoryManagement />;
             case 'AssetManagement': return <AssetManagement />;
             case 'HRManagement': return <HRManagement currentUserRole={currentUserRole} />;
+            case 'UserDepartmentManagement': return <UserDepartmentManagement currentUserRole={currentUserRole} />;
             case 'FacilityManagement': return <FacilityManagement currentUserRole={currentUserRole} />;
             case 'QualityManagement': return <QualityManagement />;
             case 'SecurityManagement': return <SecurityManagement currentUserRole={currentUserRole} />;
+            case 'DigitalSignatureLogs': return <DigitalSignatureLogs />;
             case 'BusinessProcessFlow': return <BusinessProcessFlow />;
             case 'PatientPortal': return <PatientPortal 
                                             appointments={appointments} 

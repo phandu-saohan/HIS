@@ -1,4 +1,13 @@
-import { Patient, EMRVisit, EMRDiagnosis, AuditLog, Department, ServiceItem, OutpatientVisit, LabTest, RadiologyExam, InpatientRecord, FinancialRecord, Medication, MedicationCategory, Supplier, Appointment, TelemedicineSession } from '../types';
+import { Patient, EMRVisit, EMRDiagnosis, AuditLog, Department, ServiceItem, OutpatientVisit, LabTest, RadiologyExam, InpatientRecord, FinancialRecord, Medication, MedicationCategory, Supplier, Appointment, TelemedicineSession, User, DocumentVersion, SignatureLog } from '../types';
+
+export const mockUsers: User[] = [
+  { id: 'U001', username: 'admin', fullName: 'Nguyễn Văn A', email: 'admin@hospital.vn', phone: '0901234567', role: 'Quản trị hệ thống', departmentId: 'PCT', status: 'Hoạt động', lastLogin: '2024-07-29 08:00' },
+  { id: 'U002', username: 'bs.tranb', fullName: 'Trần Thị B', email: 'tranb@hospital.vn', phone: '0912345678', role: 'Trưởng khoa / Phụ trách khoa', departmentId: 'KNT', status: 'Hoạt động', lastLogin: '2024-07-29 07:30' },
+  { id: 'U003', username: 'bs.le', fullName: 'Lê Văn C', email: 'levanc@hospital.vn', phone: '0923456789', role: 'Bác sĩ điều trị', departmentId: 'KNT', status: 'Hoạt động', lastLogin: '2024-07-29 07:45' },
+  { id: 'U004', username: 'dd.pham', fullName: 'Phạm Thị D', email: 'phamthid@hospital.vn', phone: '0934567890', role: 'Điều dưỡng viên', departmentId: 'KNT', status: 'Hoạt động', lastLogin: '2024-07-29 06:50' },
+  { id: 'U005', username: 'ktv.hoang', fullName: 'Hoàng Văn E', email: 'hoange@hospital.vn', phone: '0945678901', role: 'Kỹ thuật viên', departmentId: 'KXN', status: 'Hoạt động', lastLogin: '2024-07-29 07:15' },
+  { id: 'U006', username: 'nv.nguyen', fullName: 'Nguyễn Thị F', email: 'nguyenf@hospital.vn', phone: '0956789012', role: 'Nhân viên tiếp đón', departmentId: 'KKB', status: 'Hoạt động', lastLogin: '2024-07-29 06:30' },
+];
 
 export const mockDepartments: Omit<Department, 'rooms'>[] = [
     { id: 'DEPT01', name: 'Khoa Tim mạch', head: 'Dr. Emily Carter' },
@@ -227,4 +236,68 @@ export const mockMedications: Medication[] = [
     { id: 'MED001', name: 'Amoxicillin 500mg', category: 'Kháng sinh', stock: 1500, unit: 'Viên', supplier: 'Dược Hậu Giang', cost: 1200, expiryDate: '2025-12-31', location: 'Tủ A1' },
     { id: 'MED002', name: 'Paracetamol 500mg', category: 'Giảm đau', stock: 450, unit: 'Viên', supplier: 'Traphaco', cost: 500, expiryDate: '2026-06-30', location: 'Tủ B2' },
     { id: 'MED003', name: 'Aspirin 81mg', category: 'Tim mạch', stock: 800, unit: 'Viên', supplier: 'Dược Hậu Giang', cost: 700, expiryDate: '2024-08-30', location: 'Tủ C1' },
+];
+
+export const mockDocumentVersions: DocumentVersion[] = [
+    {
+        id: 'DOC-V1-001',
+        documentId: 'IP001',
+        documentType: 'Bệnh án nội khoa',
+        versionNumber: 1,
+        contentJson: '{"patientId": "P001", "diagnosis": "Nhồi máu cơ tim cấp", "notes": "Bệnh nhân nhập viện trong tình trạng đau ngực dữ dội."}',
+        hashValue: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        createdAt: '2024-07-29T08:30:00Z',
+        status: 'SIGNED',
+        isDeleted: false
+    },
+    {
+        id: 'DOC-V2-001',
+        documentId: 'IP001',
+        documentType: 'Bệnh án nội khoa',
+        versionNumber: 2,
+        contentJson: '{"patientId": "P001", "diagnosis": "Nhồi máu cơ tim cấp", "notes": "Bệnh nhân nhập viện trong tình trạng đau ngực dữ dội. Đã can thiệp mạch vành."}',
+        hashValue: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
+        createdAt: '2024-07-30T10:15:00Z',
+        status: 'SIGNED',
+        isDeleted: false
+    }
+];
+
+export const mockSignatureLogs: SignatureLog[] = [
+    {
+        id: 'SIG001',
+        versionId: 'DOC-V1-001',
+        signerId: 'S001',
+        signerName: 'Dr. Emily Carter',
+        signatureValue: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...',
+        certSerial: '54:32:10:98:76:54:32:10',
+        signingTime: '2024-07-29T08:35:00Z',
+        ipAddress: '192.168.1.105',
+        signatureType: 'INDIVIDUAL',
+        tsaTimestamp: '2024-07-29T08:35:01Z'
+    },
+    {
+        id: 'SIG002',
+        versionId: 'DOC-V2-001',
+        signerId: 'S001',
+        signerName: 'Dr. Emily Carter',
+        signatureValue: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...',
+        certSerial: '54:32:10:98:76:54:32:10',
+        signingTime: '2024-07-30T10:20:00Z',
+        ipAddress: '192.168.1.105',
+        signatureType: 'INDIVIDUAL',
+        tsaTimestamp: '2024-07-30T10:20:02Z'
+    },
+    {
+        id: 'SIG003',
+        versionId: 'DOC-V2-001',
+        signerId: 'HOSPITAL_CA',
+        signerName: 'Bệnh viện Đa khoa Quốc tế',
+        signatureValue: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...',
+        certSerial: '11:22:33:44:55:66:77:88',
+        signingTime: '2024-07-30T10:25:00Z',
+        ipAddress: '192.168.1.1',
+        signatureType: 'ORGANIZATION',
+        tsaTimestamp: '2024-07-30T10:25:05Z'
+    }
 ];

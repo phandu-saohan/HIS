@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { type Patient } from '../types';
+import { type Patient, type OutpatientVisit, type InpatientRecord } from '../types';
 import { mockDepartments } from '../data/mockData';
+import { Activity, Clock, FileText, Stethoscope } from 'lucide-react';
 
 interface PatientDetailProps {
     patient: Patient;
     onBack: () => void;
+    opdVisits?: OutpatientVisit[];
+    inpatientRecords?: InpatientRecord[];
 }
 
-const PatientDetail: React.FC<PatientDetailProps> = ({ patient, onBack }) => {
-    const [activeTab, setActiveTab] = useState<'info' | 'metrics'>('info');
+const PatientDetail: React.FC<PatientDetailProps> = ({ patient, onBack, opdVisits = [], inpatientRecords = [] }) => {
+    const [activeTab, setActiveTab] = useState<'info' | 'metrics' | 'history'>('info');
 
     const calculateAge = (dateOfBirth: string) => {
         const birthDate = new Date(dateOfBirth);
@@ -59,6 +62,7 @@ const PatientDetail: React.FC<PatientDetailProps> = ({ patient, onBack }) => {
                     <nav className="-mb-px flex space-x-4">
                         <TabButton text="Thông tin Chung" tab="info" activeTab={activeTab} onClick={setActiveTab} />
                         <TabButton text="Chỉ số Sức khỏe" tab="metrics" activeTab={activeTab} onClick={setActiveTab} />
+                        <TabButton text="Lịch sử Khám & Điều trị" tab="history" activeTab={activeTab} onClick={setActiveTab} />
                     </nav>
                 </div>
 
@@ -116,13 +120,117 @@ const PatientDetail: React.FC<PatientDetailProps> = ({ patient, onBack }) => {
                         )}
                     </div>
                 )}
+
+                {activeTab === 'history' && (
+                    <div className="space-y-6">
+                        {/* Outpatient History */}
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold mb-4 flex items-center text-gray-800 dark:text-white">
+                                <Stethoscope className="w-5 h-5 mr-2 text-blue-500" />
+                                Lịch sử Khám Ngoại trú
+                            </h4>
+                            {opdVisits.length > 0 ? (
+                                <div className="space-y-4">
+                                    {opdVisits.map(visit => (
+                                        <div key={visit.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <span className="font-semibold text-gray-900 dark:text-white">Mã khám: {visit.id}</span>
+                                                    <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
+                                                        <Clock className="w-4 h-4 inline mr-1" />
+                                                        {visit.arrivalTime}
+                                                    </span>
+                                                </div>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                    visit.status === 'Đã hoàn thành' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                                                    visit.status === 'Đang khám' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                                                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                                }`}>
+                                                    {visit.status}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Lý do khám</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{visit.reasonForVisit}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Chẩn đoán</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{visit.finalDiagnosis || visit.preliminaryDiagnosis || 'Chưa có chẩn đoán'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 dark:text-gray-400 text-center py-4">Không có lịch sử khám ngoại trú.</p>
+                            )}
+                        </div>
+
+                        {/* Inpatient History */}
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold mb-4 flex items-center text-gray-800 dark:text-white">
+                                <Activity className="w-5 h-5 mr-2 text-green-500" />
+                                Lịch sử Điều trị Nội trú
+                            </h4>
+                            {inpatientRecords.length > 0 ? (
+                                <div className="space-y-4">
+                                    {inpatientRecords.map(record => (
+                                        <div key={record.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <span className="font-semibold text-gray-900 dark:text-white">Hồ sơ bệnh án: {record.id}</span>
+                                                    <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
+                                                        <Clock className="w-4 h-4 inline mr-1" />
+                                                        Nhập viện: {record.admissionDate}
+                                                    </span>
+                                                </div>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                    record.status === 'Đã xuất viện' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' :
+                                                    record.status === 'Đang điều trị' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                                                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                                }`}>
+                                                    {record.status}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Khoa / Giường</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{record.department} - {record.bedId}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Bác sĩ điều trị</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{record.admittingDoctor}</p>
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Chẩn đoán chính</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{record.primaryDiagnosis}</p>
+                                                </div>
+                                                {record.dischargeDate && (
+                                                    <div className="md:col-span-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">Ngày xuất viện: {record.dischargeDate}</p>
+                                                        {record.dischargeSummary && (
+                                                            <p className="text-sm mt-1 text-gray-700 dark:text-gray-300"><span className="font-medium">Tổng kết:</span> {record.dischargeSummary}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 dark:text-gray-400 text-center py-4">Không có lịch sử điều trị nội trú.</p>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
 // Sub-components
-type TabType = 'info' | 'metrics';
+type TabType = 'info' | 'metrics' | 'history';
 const TabButton: React.FC<{ text: string, tab: TabType, activeTab: TabType, onClick: (tab: TabType) => void }> = ({ text, tab, activeTab, onClick }) => (
     <button onClick={() => onClick(tab)} className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors ${activeTab === tab ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
         {text}
