@@ -105,6 +105,14 @@ const App: React.FC = () => {
         setInpatientRecords(prev => prev.map(r => r.id === updatedRecord.id ? updatedRecord : r));
     };
     
+    const handleUpdateMedicationStock = (medicationId: string, quantityChange: number) => {
+        setMedications(prev => prev.map(med => 
+            med.id === medicationId 
+                ? { ...med, stock: Math.max(0, med.stock + quantityChange) } 
+                : med
+        ));
+    };
+
     const handleAddLabTest = (testData: Omit<LabTest, 'id' | 'orderId' | 'status' | 'results'>) => {
         const newTest: LabTest = {
             ...testData,
@@ -185,6 +193,7 @@ const App: React.FC = () => {
                                             onAddFinancialRecords={handleAddFinancialRecords}
                                             onAddLabTest={handleAddLabTest}
                                             onAddRadiologyExam={handleAddRadiologyExam}
+                                            onUpdateMedicationStock={handleUpdateMedicationStock}
                                         />;
             case 'IPDManagement': return <IPDManagement 
                                             inpatientRecords={inpatientRecords}
@@ -192,9 +201,10 @@ const App: React.FC = () => {
                                             serviceItems={mockServiceItems}
                                             medications={medications}
                                             onAddFinancialRecords={handleAddFinancialRecords}
-                                            currentUserRole={currentUserRole} 
+                                            currentUserRole={currentUserRole}
                                             onAddLabTest={handleAddLabTest}
                                             onAddRadiologyExam={handleAddRadiologyExam}
+                                            onUpdateMedicationStock={handleUpdateMedicationStock}
                                         />;
             case 'EMR': return <EMR currentUserRole={currentUserRole} />;
             case 'NursingInformationSystem': return <NursingInformationSystem inpatientRecords={inpatientRecords} onUpdateInpatientRecord={handleUpdateInpatientRecord} currentUserRole={currentUserRole} />;

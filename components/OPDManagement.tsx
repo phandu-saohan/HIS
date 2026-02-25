@@ -9,6 +9,7 @@ interface OPDManagementProps {
     onAddFinancialRecords: (records: Omit<FinancialRecord, 'id'>[]) => void;
     onAddLabTest: (testData: Omit<LabTest, 'id' | 'orderId' | 'status' | 'results'>) => void;
     onAddRadiologyExam: (examData: Omit<RadiologyExam, 'id' | 'orderId' | 'status' | 'report'>) => void;
+    onUpdateMedicationStock: (medicationId: string, quantityChange: number) => void;
 }
 
 const LOW_STOCK_THRESHOLD = 50;
@@ -52,7 +53,7 @@ const columnConfig: Record<OutpatientVisitStatus, { title: string; color: string
     'Đã hoàn thành': { title: 'Đã hoàn thành', color: 'text-green-500', icon: <CheckCircleIcon className="w-5 h-5 text-green-500" /> },
 };
 
-const OPDManagement: React.FC<OPDManagementProps> = ({ visits, onUpdateVisit, medications, serviceItems, onAddFinancialRecords, onAddLabTest, onAddRadiologyExam }) => {
+const OPDManagement: React.FC<OPDManagementProps> = ({ visits, onUpdateVisit, medications, serviceItems, onAddFinancialRecords, onAddLabTest, onAddRadiologyExam, onUpdateMedicationStock }) => {
     const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
 
     const selectedVisit = useMemo(() => {
@@ -103,6 +104,7 @@ const OPDManagement: React.FC<OPDManagementProps> = ({ visits, onUpdateVisit, me
                             onAddLabTest={onAddLabTest}
                             onAddRadiologyExam={onAddRadiologyExam}
                             allVisits={visits}
+                            onUpdateMedicationStock={onUpdateMedicationStock}
                         />
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 p-4">
@@ -173,9 +175,10 @@ interface VisitDetailViewProps {
     onAddLabTest: (testData: Omit<LabTest, 'id' | 'orderId' | 'status' | 'results'>) => void;
     onAddRadiologyExam: (examData: Omit<RadiologyExam, 'id' | 'orderId' | 'status' | 'report'>) => void;
     allVisits: OutpatientVisit[];
+    onUpdateMedicationStock: (medicationId: string, quantityChange: number) => void;
 }
 
-const VisitDetailView: React.FC<VisitDetailViewProps> = ({ visit, onSave, medications, serviceItems, onAddFinancialRecords, onAddLabTest, onAddRadiologyExam, allVisits }) => {
+const VisitDetailView: React.FC<VisitDetailViewProps> = ({ visit, onSave, medications, serviceItems, onAddFinancialRecords, onAddLabTest, onAddRadiologyExam, allVisits, onUpdateMedicationStock }) => {
     const [formData, setFormData] = useState<OutpatientVisit>(visit);
     const [activeTab, setActiveTab] = useState<ModalTab>('consult');
 
@@ -256,6 +259,24 @@ const VisitDetailView: React.FC<VisitDetailViewProps> = ({ visit, onSave, medica
             }
         });
         
+        // Update medication stock levels
+        const originalPrescription = visit.prescription || [];
+        const newPrescription = formData.prescription || [];
+        
+        const stockChanges: Record<string, number> = {};
+        originalPrescription.forEach(med => {
+            stockChanges[med.medicationId] = (stockChanges[med.medicationId] || 0) + med.quantity;
+        });
+        newPrescription.forEach(med => {
+            stockChanges[med.medicationId] = (stockChanges[med.medicationId] || 0) - med.quantity;
+        });
+        
+        Object.entries(stockChanges).forEach(([medId, change]) => {
+            if (change !== 0) {
+                onUpdateMedicationStock(medId, change);
+            }
+        });
+
         if (newFinancialRecords.length > 0) {
             onAddFinancialRecords(newFinancialRecords);
         }

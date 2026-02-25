@@ -34,6 +34,7 @@ interface IPDManagementProps {
     currentUserRole: UserRole;
     onAddLabTest: (testData: Omit<LabTest, 'id' | 'orderId' | 'status' | 'results'>) => void;
     onAddRadiologyExam: (examData: Omit<RadiologyExam, 'id' | 'orderId' | 'status' | 'report'>) => void;
+    onUpdateMedicationStock: (medicationId: string, quantityChange: number) => void;
 }
 
 const statuses: InpatientStatus[] = ['Nhập viện', 'Đang điều trị', 'Chờ xuất viện', 'Đã xuất viện'];
@@ -148,7 +149,7 @@ interface InpatientDetailViewProps extends IPDManagementProps {
 }
 type ModalTab = 'overview' | 'orders' | 'prescription' | 'nursing' | 'billing' | 'discharge';
 
-const InpatientDetailView: React.FC<InpatientDetailViewProps> = ({ record, onClose, onUpdateInpatientRecord, serviceItems, medications, onAddFinancialRecords, currentUserRole, onAddLabTest, onAddRadiologyExam }) => {
+const InpatientDetailView: React.FC<InpatientDetailViewProps> = ({ record, onClose, onUpdateInpatientRecord, serviceItems, medications, onAddFinancialRecords, currentUserRole, onAddLabTest, onAddRadiologyExam, onUpdateMedicationStock }) => {
     const [localRecord, setLocalRecord] = useState<InpatientRecord>(record);
     const [activeTab, setActiveTab] = useState<ModalTab>('overview');
 
@@ -205,6 +206,24 @@ const InpatientDetailView: React.FC<InpatientDetailViewProps> = ({ record, onClo
                     type: 'Thu',
                     amount: med.cost * med.quantity,
                 });
+            }
+        });
+
+        // Update medication stock levels
+        const originalPrescription = record.prescription || [];
+        const newPrescription = updatedRecord.prescription || [];
+        
+        const stockChanges: Record<string, number> = {};
+        originalPrescription.forEach(med => {
+            stockChanges[med.medicationId] = (stockChanges[med.medicationId] || 0) + med.quantity;
+        });
+        newPrescription.forEach(med => {
+            stockChanges[med.medicationId] = (stockChanges[med.medicationId] || 0) - med.quantity;
+        });
+        
+        Object.entries(stockChanges).forEach(([medId, change]) => {
+            if (change !== 0) {
+                onUpdateMedicationStock(medId, change);
             }
         });
 
