@@ -33,7 +33,7 @@ const Reporting: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="lg:col-span-2 modern-card p-6">
           <h3 className="font-bold text-lg mb-4">Lượt nhập viện hàng tuần</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={patientData}>
@@ -45,7 +45,7 @@ const Reporting: React.FC = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
           <h3 className="font-bold text-lg mb-4">Bệnh nhân theo khoa</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>

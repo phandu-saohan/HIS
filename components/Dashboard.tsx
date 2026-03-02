@@ -21,7 +21,7 @@ const Dashboard: React.FC = () => {
         <Card title="Doanh thu hôm nay" value={"150M"} icon={<CurrencyIcon />} color="bg-indigo-100 dark:bg-indigo-900 text-indigo-500" />
       </div>
 
-       <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+       <div className="mt-8 modern-card p-6">
           <h3 className="font-bold text-lg mb-4">Hoạt động trong ngày</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={quickStats}>

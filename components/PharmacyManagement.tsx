@@ -5,11 +5,17 @@ import Card from './ui/Card';
 
 interface PharmacyManagementProps {
     medications: Medication[];
-    setMedications: React.Dispatch<React.SetStateAction<Medication[]>>;
     categories: MedicationCategory[];
-    setCategories: React.Dispatch<React.SetStateAction<MedicationCategory[]>>;
     suppliers: Supplier[];
-    setSuppliers: React.Dispatch<React.SetStateAction<Supplier[]>>;
+    onAddMedication: (med: Omit<Medication, 'id'>) => void;
+    onUpdateMedication: (med: Medication) => void;
+    onDeleteMedication: (id: string) => void;
+    onAddCategory: (cat: Omit<MedicationCategory, 'id'>) => void;
+    onUpdateCategory: (cat: MedicationCategory) => void;
+    onDeleteCategory: (id: string) => void;
+    onAddSupplier: (sup: Omit<Supplier, 'id'>) => void;
+    onUpdateSupplier: (sup: Supplier) => void;
+    onDeleteSupplier: (id: string) => void;
 }
 
 const LOW_STOCK_THRESHOLD = 50;
@@ -17,7 +23,20 @@ const EXPIRY_THRESHOLD_DAYS = 30;
 
 type PharmacyTab = 'dashboard' | 'list' | 'categories' | 'suppliers';
 
-const PharmacyManagement: React.FC<PharmacyManagementProps> = ({ medications, setMedications, categories, setCategories, suppliers, setSuppliers }) => {
+const PharmacyManagement: React.FC<PharmacyManagementProps> = ({ 
+    medications, 
+    categories, 
+    suppliers,
+    onAddMedication,
+    onUpdateMedication,
+    onDeleteMedication,
+    onAddCategory,
+    onUpdateCategory,
+    onDeleteCategory,
+    onAddSupplier,
+    onUpdateSupplier,
+    onDeleteSupplier
+}) => {
     const [activeTab, setActiveTab] = useState<PharmacyTab>('dashboard');
     const [isMedicationModalOpen, setIsMedicationModalOpen] = useState(false);
     const [medicationToEdit, setMedicationToEdit] = useState<Medication | null>(null);
@@ -34,22 +53,21 @@ const PharmacyManagement: React.FC<PharmacyManagementProps> = ({ medications, se
 
     const handleDeleteMedication = (medId: string) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa thuốc này?')) {
-            setMedications(prev => prev.filter(m => m.id !== medId));
+            onDeleteMedication(medId);
         }
     }
 
     const handleSaveMedication = (medData: Omit<Medication, 'id'>, id?: string) => {
         if (id) {
-            setMedications(prev => prev.map(m => m.id === id ? { ...medData, id } : m));
+            onUpdateMedication({ ...medData, id });
         } else {
-            const newMed = { ...medData, id: `MED${Date.now()}` };
-            setMedications(prev => [newMed, ...prev]);
+            onAddMedication(medData);
         }
         setIsMedicationModalOpen(false);
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <h2 className="text-2xl font-bold mb-4">Quản lý Dược phẩm</h2>
             <div className="border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto">
@@ -62,8 +80,8 @@ const PharmacyManagement: React.FC<PharmacyManagementProps> = ({ medications, se
             <div className="mt-6">
                 {activeTab === 'dashboard' && <DashboardView medications={medications} />}
                 {activeTab === 'list' && <MedicationListView medications={medications} onAddNew={handleAddNewMedication} onEdit={handleEditMedication} onDelete={handleDeleteMedication} categories={categories} suppliers={suppliers} />}
-                {activeTab === 'categories' && <CategoryManagementView categories={categories} setCategories={setCategories} />}
-                {activeTab === 'suppliers' && <SupplierManagementView suppliers={suppliers} setSuppliers={setSuppliers} />}
+                {activeTab === 'categories' && <CategoryManagementView categories={categories} onAdd={onAddCategory} onUpdate={onUpdateCategory} onDelete={onDeleteCategory} />}
+                {activeTab === 'suppliers' && <SupplierManagementView suppliers={suppliers} onAdd={onAddSupplier} onUpdate={onUpdateSupplier} onDelete={onDeleteSupplier} />}
             </div>
             {isMedicationModalOpen && (
                 <MedicationFormModal
@@ -177,7 +195,7 @@ const MedicationListView: React.FC<{ medications: Medication[], onAddNew: () => 
                     <input type="text" placeholder="Tìm kiếm thuốc..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><SearchIcon /></span>
                 </div>
-                <button onClick={onAddNew} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                <button onClick={onAddNew} className="btn-primary flex items-center">
                     <PlusIcon /> <span className="ml-2">Thêm thuốc mới</span>
                 </button>
             </div>
@@ -285,29 +303,34 @@ const MedicationFormModal: React.FC<{ medication: Medication | null, onSave: (me
 };
 
 // Category Management View
-const CategoryManagementView: React.FC<{ categories: MedicationCategory[], setCategories: React.Dispatch<React.SetStateAction<MedicationCategory[]>> }> = ({ categories, setCategories }) => {
+const CategoryManagementView: React.FC<{ 
+    categories: MedicationCategory[], 
+    onAdd: (cat: Omit<MedicationCategory, 'id'>) => void,
+    onUpdate: (cat: MedicationCategory) => void,
+    onDelete: (id: string) => void
+}> = ({ categories, onAdd, onUpdate, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [toEdit, setToEdit] = useState<MedicationCategory | null>(null);
 
     const handleSave = (data: Omit<MedicationCategory, 'id'>, id?: string) => {
         if (id) {
-            setCategories(prev => prev.map(c => c.id === id ? { ...data, id } : c));
+            onUpdate({ ...data, id });
         } else {
-            setCategories(prev => [{ ...data, id: `CAT${Date.now()}` }, ...prev]);
+            onAdd(data);
         }
         setIsModalOpen(false);
     };
 
     const handleDelete = (id: string) => {
         if (window.confirm('Bạn có chắc muốn xóa danh mục này?')) {
-            setCategories(prev => prev.filter(c => c.id !== id));
+            onDelete(id);
         }
     };
     
     return (
         <div>
              <div className="flex justify-end mb-4">
-                <button onClick={() => { setToEdit(null); setIsModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                <button onClick={() => { setToEdit(null); setIsModalOpen(true); }} className="btn-primary flex items-center">
                     <PlusIcon /> <span className="ml-2">Thêm danh mục</span>
                 </button>
             </div>
@@ -360,29 +383,34 @@ const CategoryFormModal: React.FC<{ category: MedicationCategory | null, onSave:
 };
 
 // Supplier Management View
-const SupplierManagementView: React.FC<{ suppliers: Supplier[], setSuppliers: React.Dispatch<React.SetStateAction<Supplier[]>> }> = ({ suppliers, setSuppliers }) => {
+const SupplierManagementView: React.FC<{ 
+    suppliers: Supplier[], 
+    onAdd: (sup: Omit<Supplier, 'id'>) => void,
+    onUpdate: (sup: Supplier) => void,
+    onDelete: (id: string) => void
+}> = ({ suppliers, onAdd, onUpdate, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [toEdit, setToEdit] = useState<Supplier | null>(null);
 
     const handleSave = (data: Omit<Supplier, 'id'>, id?: string) => {
         if (id) {
-            setSuppliers(prev => prev.map(s => s.id === id ? { ...data, id } : s));
+            onUpdate({ ...data, id });
         } else {
-            setSuppliers(prev => [{ ...data, id: `SUP${Date.now()}` }, ...prev]);
+            onAdd(data);
         }
         setIsModalOpen(false);
     };
 
     const handleDelete = (id: string) => {
         if (window.confirm('Bạn có chắc muốn xóa nhà cung cấp này?')) {
-            setSuppliers(prev => prev.filter(s => s.id !== id));
+            onDelete(id);
         }
     };
 
     return (
         <div>
              <div className="flex justify-end mb-4">
-                <button onClick={() => { setToEdit(null); setIsModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                <button onClick={() => { setToEdit(null); setIsModalOpen(true); }} className="btn-primary flex items-center">
                     <PlusIcon /> <span className="ml-2">Thêm nhà cung cấp</span>
                 </button>
             </div>

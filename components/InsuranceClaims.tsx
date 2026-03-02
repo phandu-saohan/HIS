@@ -22,7 +22,7 @@ const InsuranceClaims: React.FC = () => {
     }
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <h2 className="text-2xl font-bold mb-6">Quản lý Bảo hiểm Y tế (BHYT)</h2>
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">

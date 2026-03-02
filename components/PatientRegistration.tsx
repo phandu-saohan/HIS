@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { type Patient, type UserRole } from '../types';
 import { mockDepartments } from '../data/mockData';
+import PatientFormModal from './PatientFormModal';
 
 interface PatientManagementProps {
     onAddPatient: (patientData: Omit<Patient, 'id' | 'avatar'>) => void;
@@ -36,7 +37,7 @@ const PatientRegistration: React.FC<PatientManagementProps> = ({ onAddPatient, o
         }
     }
 
-    const handleSavePatient = (patientFormData: Omit<Patient, 'id' | 'avatar' | 'assignedDoctorId' | 'doctor'>, id?: string) => {
+    const handleSavePatient = (patientFormData: Omit<Patient, 'id' | 'assignedDoctorId' | 'doctor'>, id?: string) => {
         const dummyDoctorInfo = { doctor: 'Dr. Michael Chen', assignedDoctorId: 'S004' };
 
         if (id && patientToEdit) {
@@ -59,7 +60,7 @@ const PatientRegistration: React.FC<PatientManagementProps> = ({ onAddPatient, o
     
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                     <h2 className="text-2xl font-bold">Quản lý Bệnh nhân</h2>
                     {canManage && (
@@ -68,7 +69,7 @@ const PatientRegistration: React.FC<PatientManagementProps> = ({ onAddPatient, o
                                 <input type="text" placeholder="Tìm theo tên, ID, SĐT..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 w-64 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"/>
                                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"/>
                             </div>
-                            <button onClick={handleAddNew} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                            <button onClick={handleAddNew} className="btn-primary flex items-center">
                                 <PlusIcon />
                                 <span className="ml-2">Thêm Bệnh nhân</span>
                             </button>
@@ -92,7 +93,11 @@ const PatientRegistration: React.FC<PatientManagementProps> = ({ onAddPatient, o
                         </thead>
                         <tbody>
                             {filteredPatients.map(patient => (
-                                <tr key={patient.id} className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <tr 
+                                    key={patient.id} 
+                                    onClick={() => onViewDetail(patient.id)}
+                                    className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors"
+                                >
                                     <td className="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center">
                                         <img src={patient.avatar} alt={patient.name} className="w-10 h-10 rounded-full mr-3" />
                                         <div>
@@ -105,7 +110,7 @@ const PatientRegistration: React.FC<PatientManagementProps> = ({ onAddPatient, o
                                     <td className="px-6 py-4">{patient.phoneNumber}</td>
                                     <td className="px-6 py-4">{getDepartmentName(patient.admittingDepartment)}</td>
                                     {canManage && (
-                                        <td className="px-6 py-4 flex items-center space-x-2">
+                                        <td className="px-6 py-4 flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => onViewDetail(patient.id)} className="p-1 text-blue-500 hover:text-blue-700" title="Xem"><EyeIcon /></button>
                                             <button onClick={() => handleEdit(patient)} className="p-1 text-yellow-500 hover:text-yellow-700" title="Sửa"><PencilIcon /></button>
                                             <button onClick={() => handleDelete(patient.id)} className="p-1 text-red-500 hover:text-red-700" title="Xóa"><TrashIcon /></button>
@@ -125,101 +130,6 @@ const PatientRegistration: React.FC<PatientManagementProps> = ({ onAddPatient, o
                 />
             )}
         </>
-    );
-};
-
-// Form Modal Sub-component
-interface PatientFormModalProps {
-    patient: Patient | null;
-    onSave: (patientData: Omit<Patient, 'id' | 'avatar' | 'assignedDoctorId' | 'doctor'>, id?: string) => void;
-    onClose: () => void;
-}
-
-const PatientFormModal: React.FC<PatientFormModalProps> = ({ patient, onSave, onClose }) => {
-    const [formData, setFormData] = useState({
-        name: patient?.name || '',
-        dateOfBirth: patient?.dateOfBirth || '',
-        gender: patient?.gender || 'Khác',
-        nationalId: patient?.nationalId || '',
-        healthInsuranceId: patient?.healthInsuranceId || '',
-        address: patient?.address || '',
-        occupation: patient?.occupation || '',
-        phoneNumber: patient?.phoneNumber || '',
-        emergencyContact: {
-            name: patient?.emergencyContact.name || '',
-            phone: patient?.emergencyContact.phone || '',
-        },
-        patientType: patient?.patientType || 'Viện phí',
-        admissionDate: patient?.admissionDate || new Date().toISOString().split('T')[0],
-        admittingDepartment: patient?.admittingDepartment || 'DEPT03',
-        reasonForVisit: patient?.reasonForVisit || '',
-    });
-
-    useEffect(() => {
-        const handleEsc = (event: KeyboardEvent) => {
-           if (event.key === 'Escape') {
-              onClose();
-           }
-        };
-        window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [onClose]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        if (name === 'emergencyContactName') {
-            setFormData(prev => ({ ...prev, emergencyContact: { ...prev.emergencyContact, name: value } }));
-        } else if (name === 'emergencyContactPhone') {
-            setFormData(prev => ({ ...prev, emergencyContact: { ...prev.emergencyContact, phone: value } }));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSave(formData, patient?.id);
-    };
-
-    const inputFieldClass = "mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 dark:border-gray-600";
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-0 w-full max-w-4xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                <div className="p-4 border-b dark:border-gray-700">
-                    <h3 className="text-xl font-bold">{patient ? 'Chỉnh sửa thông tin Bệnh nhân' : 'Đăng ký Bệnh nhân mới'}</h3>
-                </div>
-                <form id="patient-form" onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
-                    <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 border p-4 rounded-md">
-                        <legend className="text-lg font-semibold px-2">Thông tin Cá nhân</legend>
-                        <div className="md:col-span-2"><label className="block text-sm font-medium">Họ và tên</label><input type="text" name="name" value={formData.name} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div><label className="block text-sm font-medium">Ngày sinh</label><input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div><label className="block text-sm font-medium">Giới tính</label><select name="gender" value={formData.gender} onChange={handleChange} className={inputFieldClass} required><option>Nam</option><option>Nữ</option><option>Khác</option></select></div>
-                        <div><label className="block text-sm font-medium">Số CCCD/CMND</label><input type="text" name="nationalId" value={formData.nationalId} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div><label className="block text-sm font-medium">Số điện thoại</label><input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div className="md:col-span-2"><label className="block text-sm font-medium">Địa chỉ</label><input type="text" name="address" value={formData.address} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div><label className="block text-sm font-medium">Nghề nghiệp</label><input type="text" name="occupation" value={formData.occupation} onChange={handleChange} className={inputFieldClass} /></div>
-                    </fieldset>
-                    <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 border p-4 rounded-md">
-                        <legend className="text-lg font-semibold px-2">Liên hệ Khẩn cấp</legend>
-                        <div><label className="block text-sm font-medium">Họ tên người thân</label><input type="text" name="emergencyContactName" value={formData.emergencyContact.name} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div><label className="block text-sm font-medium">Số điện thoại</label><input type="tel" name="emergencyContactPhone" value={formData.emergencyContact.phone} onChange={handleChange} className={inputFieldClass} required /></div>
-                    </fieldset>
-                    <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 border p-4 rounded-md">
-                        <legend className="text-lg font-semibold px-2">Thông tin Khám bệnh</legend>
-                        <div><label className="block text-sm font-medium">Đối tượng</label><select name="patientType" value={formData.patientType} onChange={handleChange} className={inputFieldClass}><option>BHYT</option><option>Viện phí</option><option>Yêu cầu</option><option>Miễn phí</option></select></div>
-                        <div><label className="block text-sm font-medium">Mã BHYT (nếu có)</label><input type="text" name="healthInsuranceId" value={formData.healthInsuranceId} onChange={handleChange} className={inputFieldClass} /></div>
-                        <div><label className="block text-sm font-medium">Khoa đăng ký khám</label><select name="admittingDepartment" value={formData.admittingDepartment} onChange={handleChange} className={inputFieldClass} required>{mockDepartments.map(dept => <option key={dept.id} value={dept.id}>{dept.name}</option>)}</select></div>
-                        <div><label className="block text-sm font-medium">Ngày nhập viện</label><input type="date" name="admissionDate" value={formData.admissionDate} onChange={handleChange} className={inputFieldClass} required /></div>
-                        <div className="md:col-span-2"><label className="block text-sm font-medium">Lý do đến khám</label><textarea name="reasonForVisit" value={formData.reasonForVisit} onChange={handleChange} rows={3} className={inputFieldClass} required /></div>
-                    </fieldset>
-                </form>
-                <div className="flex justify-end p-4 bg-gray-50 dark:bg-gray-700/50 space-x-2 mt-auto">
-                    <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500">Hủy</button>
-                    <button type="submit" form="patient-form" className="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
-                </div>
-            </div>
-        </div>
     );
 };
 

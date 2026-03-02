@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
 import { type MedicalSupply } from '../types';
 
-const mockSupplies: MedicalSupply[] = [
-    { id: 'SUP001', name: 'Găng tay y tế (Hộp 100)', stock: 500, category: 'Vật tư tiêu hao', supplier: 'MediSupply' },
-    { id: 'SUP002', name: 'Kim tiêm 5ml (Hộp 100)', stock: 35, category: 'Vật tư tiêu hao', supplier: 'Health Inc' },
-    { id: 'SUP003', name: 'Bông gạc (Cuộn)', stock: 250, category: 'Vật tư tiêu hao', supplier: 'MediSupply' },
-    { id: 'SUP004', name: 'Dung dịch sát khuẩn Povidine', stock: 60, category: 'Hóa chất', supplier: 'PharmaCorp' },
-    { id: 'SUP005', name: 'Ống nghiệm (Hộp 50)', stock: 15, category: 'Vật tư phòng Lab', supplier: 'Health Inc' },
-];
+interface InventoryManagementProps {
+    supplies: MedicalSupply[];
+}
 
-const InventoryManagement: React.FC = () => {
-    const [supplies] = useState<MedicalSupply[]>(mockSupplies);
+const InventoryManagement: React.FC<InventoryManagementProps> = ({ supplies }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredSupplies = supplies.filter(supply => 
@@ -18,7 +13,7 @@ const InventoryManagement: React.FC = () => {
     );
     
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Quản lý Vật tư Y tế</h2>
                 <div className="relative">

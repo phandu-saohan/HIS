@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { type Invoice, type Patient, type BillableItem } from '../types';
+import { type Invoice, type Patient, type BillableItem, type ServiceItem } from '../types';
 import { mockPatients, mockServiceItems } from '../data/mockData';
 import Card from './ui/Card';
 
@@ -63,8 +63,23 @@ const initialMockInvoices: Invoice[] = [
 ];
 
 
-const ServiceBilling: React.FC = () => {
-    const [invoices, setInvoices] = useState<Invoice[]>(initialMockInvoices);
+interface ServiceBillingProps {
+    invoices: Invoice[];
+    patients: Patient[];
+    serviceItems: ServiceItem[];
+    onAddInvoice: (data: Omit<Invoice, 'id'>) => void;
+    onUpdateInvoice: (data: Invoice) => void;
+    onDeleteInvoice: (id: string) => void;
+}
+
+const ServiceBilling: React.FC<ServiceBillingProps> = ({ 
+    invoices, 
+    patients, 
+    serviceItems,
+    onAddInvoice,
+    onUpdateInvoice,
+    onDeleteInvoice
+}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'view' | 'form'>('view');
     const [invoiceToManage, setInvoiceToManage] = useState<Invoice | null>(null);
@@ -108,21 +123,24 @@ const ServiceBilling: React.FC = () => {
 
     const handleSaveInvoice = (data: Invoice) => {
         if (invoiceToManage) { // Edit
-            setInvoices(prev => prev.map(inv => inv.id === invoiceToManage.id ? data : inv));
+            onUpdateInvoice(data);
         } else { // New
-            setInvoices(prev => [data, ...prev]);
+            onAddInvoice(data);
         }
         handleCloseModal();
     };
 
     const handleDeleteInvoice = (id: string) => {
         if(window.confirm('Bạn có chắc muốn xóa hóa đơn này?')) {
-            setInvoices(prev => prev.filter(inv => inv.id !== id));
+            onDeleteInvoice(id);
         }
     };
     
     const handleMarkAsPaid = (id: string) => {
-        setInvoices(prev => prev.map(inv => inv.id === id ? {...inv, status: 'Paid'} : inv));
+        const invoice = invoices.find(inv => inv.id === id);
+        if (invoice) {
+            onUpdateInvoice({ ...invoice, status: 'Paid' });
+        }
         handleCloseModal();
     };
     
@@ -147,7 +165,7 @@ const ServiceBilling: React.FC = () => {
                 </div>
 
                 {/* Main Table View */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <div className="modern-card p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <div className="flex items-center space-x-4">
                             <div className="relative">
@@ -161,7 +179,7 @@ const ServiceBilling: React.FC = () => {
                                 <option value="Overdue">Quá hạn</option>
                             </select>
                         </div>
-                        <button onClick={() => handleOpenModal(null, 'form')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center w-full sm:w-auto justify-center">
+                        <button onClick={() => handleOpenModal(null, 'form')} className="btn-primary flex items-center w-full sm:w-auto justify-center">
                             <PlusIcon />
                             <span className="ml-2">Tạo hóa đơn</span>
                         </button>
@@ -200,7 +218,7 @@ const ServiceBilling: React.FC = () => {
                     </div>
                 </div>
             </div>
-            {isModalOpen && <InvoiceModal mode={modalMode} invoice={invoiceToManage} onSave={handleSaveInvoice} onMarkAsPaid={handleMarkAsPaid} onClose={handleCloseModal} />}
+            {isModalOpen && <InvoiceModal mode={modalMode} invoice={invoiceToManage} patients={patients} serviceItems={serviceItems} onSave={handleSaveInvoice} onMarkAsPaid={handleMarkAsPaid} onClose={handleCloseModal} />}
         </>
     );
 };
@@ -209,6 +227,8 @@ const ServiceBilling: React.FC = () => {
 interface InvoiceModalProps {
     mode: 'view' | 'form';
     invoice: Invoice | null;
+    patients: Patient[];
+    serviceItems: ServiceItem[];
     onSave: (data: Invoice) => void;
     onMarkAsPaid: (id: string) => void;
     onClose: () => void;
@@ -220,7 +240,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = (props) => {
                 {props.mode === 'view' && props.invoice ? (
                     <InvoiceDetailView invoice={props.invoice} onClose={props.onClose} onMarkAsPaid={props.onMarkAsPaid} />
                 ) : (
-                    <InvoiceFormView invoice={props.invoice} onSave={props.onSave} onClose={props.onClose} />
+                    <InvoiceFormView invoice={props.invoice} patients={props.patients} serviceItems={props.serviceItems} onSave={props.onSave} onClose={props.onClose} />
                 )}
             </div>
         </div>
@@ -262,7 +282,13 @@ const InvoiceDetailView: React.FC<{ invoice: Invoice, onClose: () => void, onMar
 };
 
 // --- Form View Sub-component ---
-const InvoiceFormView: React.FC<{ invoice: Invoice | null, onSave: (data: Invoice) => void, onClose: () => void }> = ({ invoice, onSave, onClose }) => {
+const InvoiceFormView: React.FC<{ 
+    invoice: Invoice | null, 
+    patients: Patient[],
+    serviceItems: ServiceItem[],
+    onSave: (data: Invoice) => void, 
+    onClose: () => void 
+}> = ({ invoice, patients, serviceItems, onSave, onClose }) => {
     const [formData, setFormData] = useState<Omit<Invoice, 'id' | 'amount'>>({
         patientId: invoice?.patientId || '',
         patientName: invoice?.patientName || '',
@@ -273,11 +299,11 @@ const InvoiceFormView: React.FC<{ invoice: Invoice | null, onSave: (data: Invoic
     });
 
     useEffect(() => {
-        const patient = mockPatients.find(p => p.id === formData.patientId);
+        const patient = patients.find(p => p.id === formData.patientId);
         if(patient) {
             setFormData(f => ({...f, patientName: patient.name}));
         }
-    }, [formData.patientId]);
+    }, [formData.patientId, patients]);
     
     const totalAmount = useMemo(() => formData.items.reduce((sum, item) => sum + item.total, 0), [formData.items]);
     
@@ -306,13 +332,13 @@ const InvoiceFormView: React.FC<{ invoice: Invoice | null, onSave: (data: Invoic
                         <label className="text-sm font-medium">Bệnh nhân</label>
                         <select value={formData.patientId} onChange={e => setFormData({...formData, patientId: e.target.value})} className={inputClass} required>
                             <option value="">-- Chọn bệnh nhân --</option>
-                            {mockPatients.map(p => <option key={p.id} value={p.id}>{p.name} ({p.id})</option>)}
+                            {patients.map(p => <option key={p.id} value={p.id}>{p.name} ({p.id})</option>)}
                         </select>
                     </div>
                     <div><label className="text-sm font-medium">Ngày lập</label><input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className={inputClass} required/></div>
                     <div><label className="text-sm font-medium">Hạn thanh toán</label><input type="date" value={formData.dueDate} onChange={e => setFormData({...formData, dueDate: e.target.value})} className={inputClass} required/></div>
                 </div>
-                <ItemEditor items={formData.items} onItemsChange={handleItemsChange} />
+                <ItemEditor items={formData.items} serviceItems={serviceItems} onItemsChange={handleItemsChange} />
                 <div className="text-right font-bold text-xl">Tổng cộng: {totalAmount.toLocaleString('vi-VN')} đ</div>
             </form>
             <div className="flex justify-end p-4 bg-gray-50 dark:bg-gray-700/50 space-x-2 mt-auto">
@@ -324,9 +350,13 @@ const InvoiceFormView: React.FC<{ invoice: Invoice | null, onSave: (data: Invoic
 };
 
 // Item Editor for Form
-const ItemEditor: React.FC<{ items: BillableItem[], onItemsChange: (items: BillableItem[]) => void }> = ({ items, onItemsChange }) => {
+const ItemEditor: React.FC<{ 
+    items: BillableItem[], 
+    serviceItems: ServiceItem[],
+    onItemsChange: (items: BillableItem[]) => void 
+}> = ({ items, serviceItems, onItemsChange }) => {
     // A simplified item selector for demonstration
-    const availableItems = mockServiceItems.map(s => ({ id: s.id, description: s.name, unitPrice: s.price }));
+    const availableItems = serviceItems.map(s => ({ id: s.id, description: s.name, unitPrice: s.price }));
 
     const handleAddItem = (item: { id: string, description: string, unitPrice: number }) => {
         const newItem: BillableItem = { ...item, quantity: 1, total: item.unitPrice };

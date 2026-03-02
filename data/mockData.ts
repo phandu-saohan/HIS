@@ -1,4 +1,10 @@
-import { Patient, EMRVisit, EMRDiagnosis, AuditLog, Department, ServiceItem, OutpatientVisit, LabTest, RadiologyExam, InpatientRecord, FinancialRecord, Medication, MedicationCategory, Supplier, Appointment, TelemedicineSession, User, DocumentVersion, SignatureLog } from '../types';
+import { Staff, Patient, EMRVisit, EMRDiagnosis, AuditLog, Department, ServiceItem, OutpatientVisit, LabTest, RadiologyExam, InpatientRecord, FinancialRecord, Medication, MedicationCategory, Supplier, Appointment, TelemedicineSession, User, DocumentVersion, SignatureLog, Invoice } from '../types';
+
+export const mockStaff: Staff[] = [
+  { id: 'S001', name: 'Dr. Emily Carter', role: 'Bác sĩ', department: 'Tim mạch', status: 'Online', avatar: 'https://picsum.photos/id/1005/40/40', employeeId: 'EMP1001', joinDate: '2020-05-15', contact: '090-123-4567', email: 'ecarter@hospital.vn', dateOfBirth: '1985-02-20', address: '123 Đường A, TP. HCM', qualifications: 'MD, PhD Cardiology', contractType: 'Toàn thời gian', salary: 120000000 },
+  { id: 'S002', name: 'Dr. John Smith', role: 'Bác sĩ', department: 'Thần kinh', status: 'Online', avatar: 'https://picsum.photos/id/1006/40/40', employeeId: 'EMP1002', joinDate: '2019-11-20', contact: '090-234-5678', email: 'jsmith@hospital.vn', dateOfBirth: '1982-08-15', address: '456 Đường B, Hà Nội', qualifications: 'MD, Neurology', contractType: 'Toàn thời gian', salary: 115000000 },
+  { id: 'S003', name: 'Nurse Jane Doe', role: 'Y tá', department: 'Chỉnh hình', status: 'Offline', avatar: 'https://picsum.photos/id/1008/40/40', employeeId: 'EMP2001', joinDate: '2021-02-10', contact: '090-345-6789', email: 'jdoe@hospital.vn', dateOfBirth: '1992-11-30', address: '789 Đường C, Đà Nẵng', qualifications: 'BSN, RN', contractType: 'Toàn thời gian', salary: 35000000 },
+];
 
 export const mockUsers: User[] = [
   { id: 'U001', username: 'admin', fullName: 'Nguyễn Văn A', email: 'admin@hospital.vn', phone: '0901234567', role: 'Quản trị hệ thống', departmentId: 'PCT', status: 'Hoạt động', lastLogin: '2024-07-29 08:00' },
@@ -26,10 +32,10 @@ export const mockDoctors = [
 ];
 
 export const mockAppointments: Appointment[] = [
-  { id: 'A001', patientName: 'Nguyễn Văn An', doctorName: 'Dr. Emily Carter', doctorId: 'S001', date: '2024-07-29', time: '10:00 AM', reason: 'Tái khám tim' },
-  { id: 'A002', patientName: 'Phạm Thị Dung', doctorName: 'Dr. Michael Chen', doctorId: 'S004', date: '2024-07-29', time: '02:00 PM', reason: 'Tư vấn đau nửa đầu' },
-  { id: 'A003', patientName: 'Trần Thị Bình', doctorName: 'Dr. John Smith', doctorId: 'S002', date: '2024-07-30', time: '11:00 AM', reason: 'Kiểm tra phổi' },
-  { id: 'A004', patientName: 'Lê Văn Cường', doctorName: 'Dr. Sarah Lee', doctorId: 'S005', date: '2024-08-01', time: '09:00 AM', reason: 'Tháo bột' },
+  { id: 'A001', patientId: 'P001', patientName: 'Nguyễn Văn An', doctorName: 'Dr. Emily Carter', doctorId: 'S001', departmentName: 'Khoa Tim mạch', date: '2024-07-29', time: '10:00 AM', reason: 'Tái khám tim', status: 'Đã xác nhận' },
+  { id: 'A002', patientId: 'P004', patientName: 'Phạm Thị Dung', doctorName: 'Dr. Michael Chen', doctorId: 'S004', departmentName: 'Khoa Khám bệnh', date: '2024-07-29', time: '02:00 PM', reason: 'Tư vấn đau nửa đầu', status: 'Đã xác nhận' },
+  { id: 'A003', patientId: 'P002', patientName: 'Trần Thị Bình', doctorName: 'Dr. John Smith', doctorId: 'S002', departmentName: 'Khoa Thần kinh', date: '2024-07-30', time: '11:00 AM', reason: 'Kiểm tra phổi', status: 'Đã xác nhận' },
+  { id: 'A004', patientId: 'P003', patientName: 'Lê Văn Cường', doctorName: 'Dr. Sarah Lee', doctorId: 'S005', departmentName: 'Khoa Chỉnh hình', date: '2024-08-01', time: '09:00 AM', reason: 'Tháo bột', status: 'Đã xác nhận' },
 ];
 
 export const mockTelemedicineSessions: TelemedicineSession[] = [
@@ -43,6 +49,7 @@ export const mockTelemedicineSessions: TelemedicineSession[] = [
 export const mockPatients: Patient[] = [
     { 
         id: 'P001', name: 'Nguyễn Văn An', dateOfBirth: '1985-05-15', gender: 'Nam', phoneNumber: '0901234567', nationalId: '012345678901', healthInsuranceId: 'DN4012345678901', address: '123 Đường A, Quận 1, TP.HCM', occupation: 'Kỹ sư', emergencyContact: { name: 'Trần Thị B', phone: '0909876543' }, patientType: 'BHYT', admissionDate: '2024-07-29', admittingDepartment: 'DEPT01', doctor: 'Dr. Emily Carter', assignedDoctorId: 'S001', reasonForVisit: 'Đau ngực, khó thở', avatar: 'https://picsum.photos/id/1025/40/40',
+        notes: '# Tiền sử bệnh lý\n- Tăng huyết áp (5 năm)\n- Đái tháo đường type 2\n\n# Dị ứng\n- **Penicillin**: Phản ứng phát ban\n- Hải sản\n\n# Lưu ý đặc biệt\n- Bệnh nhân có tâm lý lo lắng, cần giải thích kỹ quy trình điều trị.',
         healthMetrics: [
             { date: '2024-07-29', bp_systolic: 140, bp_diastolic: 90, heart_rate: 95, temperature: 37.2, spo2: 96 },
             { date: '2024-07-30', bp_systolic: 130, bp_diastolic: 85, heart_rate: 80, temperature: 37.0, spo2: 98 },
@@ -105,8 +112,13 @@ export const mockServiceItems: ServiceItem[] = [
 ];
 
 export const mockOutpatientVisits: OutpatientVisit[] = [
-    { id: 'OPD001', patientId: 'P002', patientName: 'Trần Thị Bình', patientAvatar: 'https://picsum.photos/id/1026/40/40', patientDateOfBirth: '1992-11-30', arrivalTime: '08:15', status: 'Chờ khám', reasonForVisit: 'Ho kéo dài, sốt nhẹ', preliminaryDiagnosis: '', finalDiagnosis: '', vitalSigns: { temp: '37.8', bp: '110/70', hr: '88', spo2: '98', weight: '55', height: '160' }, clinicalNotes: { history: '', examination: '' } },
-    { id: 'OPD002', patientId: 'P004', patientName: 'Phạm Thị Dung', patientAvatar: 'https://picsum.photos/id/1028/40/40', patientDateOfBirth: '1995-08-10', arrivalTime: '08:30', status: 'Chờ khám', reasonForVisit: 'Đau nửa đầu, chóng mặt', preliminaryDiagnosis: '', finalDiagnosis: '', vitalSigns: { temp: '36.9', bp: '115/75', hr: '80', spo2: '99', weight: '50', height: '155' }, clinicalNotes: { history: '', examination: '' } },
+    { id: 'OPD001', patientId: 'P002', patientName: 'Trần Thị Bình', patientAvatar: 'https://picsum.photos/id/1026/40/40', patientDateOfBirth: '1992-11-30', arrivalTime: '08:15', status: 'Chờ khám', reasonForVisit: 'Ho kéo dài, sốt nhẹ', preliminaryDiagnosis: '', finalDiagnosis: '', vitalSigns: { temp: '37.8', bp: '110/70', hr: '88', spo2: '98', weight: '55', height: '160' }, clinicalNotes: { history: '', examination: '' }, prescription: [
+        { medicationId: 'M001', medicationName: 'Paracetamol 500mg', dosage: '1 viên x 3 lần/ngày', quantity: 10, cost: 5000 },
+        { medicationId: 'M002', medicationName: 'Amoxicillin 500mg', dosage: '1 viên x 2 lần/ngày', quantity: 14, cost: 15000 },
+    ] },
+    { id: 'OPD002', patientId: 'P004', patientName: 'Phạm Thị Dung', patientAvatar: 'https://picsum.photos/id/1028/40/40', patientDateOfBirth: '1995-08-10', arrivalTime: '08:30', status: 'Chờ khám', reasonForVisit: 'Đau nửa đầu, chóng mặt', preliminaryDiagnosis: '', finalDiagnosis: '', vitalSigns: { temp: '36.9', bp: '115/75', hr: '80', spo2: '99', weight: '50', height: '155' }, clinicalNotes: { history: '', examination: '' }, prescription: [
+        { medicationId: 'M003', medicationName: 'Ibuprofen 400mg', dosage: '1 viên sau ăn khi đau', quantity: 10, cost: 8000 },
+    ] },
     { id: 'OPD003', patientId: 'P003', patientName: 'Lê Văn Cường', patientAvatar: 'https://picsum.photos/id/1027/40/40', patientDateOfBirth: '1978-02-20', arrivalTime: '09:00', status: 'Đang khám', reasonForVisit: 'Kiểm tra vết thương sau tai nạn', preliminaryDiagnosis: '', finalDiagnosis: '', vitalSigns: { temp: '37.0', bp: '130/80', hr: '78', spo2: '98', weight: '70', height: '175' }, clinicalNotes: { history: '', examination: '' } },
 ];
 
@@ -145,7 +157,10 @@ export const mockInpatientRecords: InpatientRecord[] = [
             { timestamp: '2024-07-29 20:00', vitals: { temp: '37.5', bp: '130/85', hr: '85', spo2: '97', weight: '75', height: '170' }, recordedBy: 'Nurse Jane Doe' },
         ],
         nursingNotes: [],
-        prescription: [],
+        prescription: [
+            { medicationId: 'M004', medicationName: 'Aspirin 81mg', dosage: '1 viên sáng', quantity: 30, cost: 2000 },
+            { medicationId: 'M005', medicationName: 'Atorvastatin 20mg', dosage: '1 viên tối', quantity: 30, cost: 12000 },
+        ],
         isDischargeSummarySigned: false,
     },
     {
@@ -167,7 +182,9 @@ export const mockInpatientRecords: InpatientRecord[] = [
             { timestamp: '2024-07-30 07:00', vitals: { temp: '36.8', bp: '120/80', hr: '72', spo2: '99', weight: '80', height: '180' }, recordedBy: 'Nurse Alex' },
         ],
         nursingNotes: [],
-        prescription: [],
+        prescription: [
+            { medicationId: 'M006', medicationName: 'Cefuroxime 500mg', dosage: '1 viên x 2 lần/ngày', quantity: 10, cost: 25000 },
+        ],
         dischargeSummary: 'Bệnh nhân ổn định sau phẫu thuật. Vết mổ khô, không sưng tấy. Hướng dẫn tập vật lý trị liệu tại nhà và tái khám sau 2 tuần.',
         dischargeDate: '2024-07-30',
         isDischargeSummarySigned: true,
@@ -219,6 +236,48 @@ export const mockFinancialRecords: FinancialRecord[] = [
     { id: 'FIN001', date: '2024-07-29', description: 'Tạm ứng viện phí - Nguyễn Văn An', type: 'Thu', amount: 5000000 },
     { id: 'FIN002', date: '2024-07-29', description: 'Chi mua vật tư y tế', type: 'Chi', amount: 2500000 },
     { id: 'FIN003', date: '2024-07-29', description: 'Thanh toán phí khám - Trần Thị Bình', type: 'Thu', amount: 150000 },
+];
+
+export const mockInvoices: Invoice[] = [
+    {
+        id: 'INV001',
+        patientId: 'P001',
+        patientName: 'Nguyễn Văn An',
+        amount: 4500000,
+        date: '2024-07-29',
+        dueDate: '2024-08-05',
+        status: 'Paid',
+        items: [
+            { id: 'ITM001', description: 'Khám chuyên khoa Tim mạch', quantity: 1, unitPrice: 500000, total: 500000 },
+            { id: 'ITM002', description: 'Xét nghiệm Troponin T', quantity: 1, unitPrice: 1500000, total: 1500000 },
+            { id: 'ITM003', description: 'Điện tâm đồ (ECG)', quantity: 1, unitPrice: 500000, total: 500000 },
+            { id: 'ITM004', description: 'Phí nằm viện (1 ngày)', quantity: 1, unitPrice: 2000000, total: 2000000 },
+        ]
+    },
+    {
+        id: 'INV002',
+        patientId: 'P002',
+        patientName: 'Trần Thị Bình',
+        amount: 150000,
+        date: '2024-07-29',
+        dueDate: '2024-08-05',
+        status: 'Paid',
+        items: [
+            { id: 'ITM005', description: 'Khám chuyên khoa Hô hấp', quantity: 1, unitPrice: 150000, total: 150000 },
+        ]
+    },
+    {
+        id: 'INV003',
+        patientId: 'P001',
+        patientName: 'Nguyễn Văn An',
+        amount: 1200000,
+        date: '2024-07-31',
+        dueDate: '2024-08-07',
+        status: 'Pending',
+        items: [
+            { id: 'ITM006', description: 'Thuốc điều trị (Aspirin, Clopidogrel)', quantity: 1, unitPrice: 1200000, total: 1200000 },
+        ]
+    }
 ];
 
 export const mockMedicationCategories: MedicationCategory[] = [

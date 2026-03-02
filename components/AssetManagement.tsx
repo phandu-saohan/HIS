@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { type Asset } from '../types';
 
-const mockAssets: Asset[] = [
-    { id: 'ASSET01', name: 'Máy X-Quang', location: 'Phòng CĐHA', status: 'Hoạt động', lastMaintenance: '2024-05-10', nextMaintenance: '2024-11-10' },
-    { id: 'ASSET02', name: 'Máy siêu âm', location: 'Phòng siêu âm 1', status: 'Bảo trì', lastMaintenance: '2024-07-20', nextMaintenance: '2025-01-20' },
-    { id: 'ASSET03', name: 'Máy thở', location: 'Khoa Hồi sức', status: 'Hoạt động', lastMaintenance: '2024-06-15', nextMaintenance: '2024-12-15' },
-    { id: 'ASSET04', name: 'Máy xét nghiệm máu', location: 'Phòng Lab', status: 'Hoạt động', lastMaintenance: '2024-07-01', nextMaintenance: '2025-01-01' },
-    { id: 'ASSET05', name: 'Giường mổ điện', location: 'Phòng mổ 2', status: 'Ngừng hoạt động', lastMaintenance: '2024-04-01', nextMaintenance: 'N/A' },
-];
+interface AssetManagementProps {
+    assets: Asset[];
+}
 
-const AssetManagement: React.FC = () => {
-    const [assets] = useState<Asset[]>(mockAssets);
-
+const AssetManagement: React.FC<AssetManagementProps> = ({ assets }) => {
     const getStatusClass = (status: Asset['status']) => {
         switch (status) {
             case 'Hoạt động': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
@@ -21,7 +15,7 @@ const AssetManagement: React.FC = () => {
     }
     
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <h2 className="text-2xl font-bold mb-6">Quản lý Tài sản/Thiết bị</h2>
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">

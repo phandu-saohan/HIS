@@ -58,9 +58,10 @@ export interface Patient {
     patientType: 'BHYT' | 'Viện phí' | 'Yêu cầu' | 'Miễn phí';
     admissionDate: string;
     admittingDepartment: string; // departmentId
-    doctor: string;
-    assignedDoctorId: string;
+    doctor?: string;
+    assignedDoctorId?: string;
     reasonForVisit: string;
+    notes?: string;
     healthMetrics?: HealthMetric[];
 }
 
@@ -68,7 +69,8 @@ export interface Department {
     id: string;
     name: string;
     head: string;
-    rooms: ExaminationRoom[];
+    type?: 'Lâm sàng' | 'Cận lâm sàng' | 'Chức năng';
+    rooms?: ExaminationRoom[];
 }
 
 export interface ExaminationRoom {
@@ -86,12 +88,15 @@ export interface QueueTicket {
 
 export interface Appointment {
     id: string;
+    patientId?: string;
     patientName: string;
     doctorName: string;
     doctorId: string;
+    departmentName?: string;
     date: string;
     time: string;
     reason: string;
+    status?: 'Chờ xác nhận' | 'Đã xác nhận' | 'Đã khám' | 'Đã hủy';
 }
 
 export interface BillableItem {

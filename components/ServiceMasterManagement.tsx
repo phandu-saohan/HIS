@@ -18,10 +18,10 @@ const ServiceMasterManagement: React.FC = () => {
 
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Quản lý Danh mục Dịch vụ</h2>
-                    <button onClick={() => { setServiceToEdit(null); setIsModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                    <button onClick={() => { setServiceToEdit(null); setIsModalOpen(true); }} className="btn-primary flex items-center">
                         <PlusIcon /> <span className="ml-2">Thêm dịch vụ</span>
                     </button>
                 </div>

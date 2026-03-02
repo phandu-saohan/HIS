@@ -1,0 +1,142 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  fullName     String
+  email        String   @unique
+  phone        String?
+  role         String
+  departmentId String?
+  status       String   @default("Hoạt động")
+  lastLogin    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Patient {
+  id                String   @id @default(uuid())
+  avatar            String?
+  name              String
+  dateOfBirth       DateTime
+  gender            String
+  phoneNumber       String
+  nationalId        String   @unique
+  healthInsuranceId String?
+  address           String
+  occupation        String?
+  patientType       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  outpatientVisits  OutpatientVisit[]
+  inpatientRecords  InpatientRecord[]
+}
+
+model OutpatientVisit {
+  id                   String   @id @default(uuid())
+  patientId            String
+  patient              Patient  @relation(fields: [patientId], references: [id])
+  arrivalTime          DateTime @default(now())
+  status               String   @default("Chờ khám")
+  reasonForVisit       String?
+  preliminaryDiagnosis String?
+  finalDiagnosis       String?
+  
+  // JSON fields for complex nested data in SQLite
+  vitalSigns           String?  // JSON string
+  clinicalNotes        String?  // JSON string
+  labOrders            String?  // JSON string
+  radiologyOrders      String?  // JSON string
+  prescription         String?  // JSON string
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model InpatientRecord {
+  id                       String   @id @default(uuid())
+  patientId                String
+  patient                  Patient  @relation(fields: [patientId], references: [id])
+  bedId                    String?
+  department               String?
+  admissionDate            DateTime @default(now())
+  primaryDiagnosis         String?
+  admittingDoctor          String?
+  status                   String   @default("Nhập viện")
+  
+  // JSON fields for complex nested data
+  clinicalOrders           String?  // JSON string
+  nursingTasks             String?  // JSON string
+  vitalSignRecords         String?  // JSON string
+  nursingNotes             String?  // JSON string
+  prescription             String?  // JSON string
+  
+  dischargeSummary         String?
+  dischargeDate            DateTime?
+  isDischargeSummarySigned Boolean  @default(false)
+
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model ServiceItem {
+  id           String   @id @default(uuid())
+  name         String
+  category     String
+  price        Float
+  departmentId String?
+}
+
+model Medication {
+  id               String   @id @default(uuid())
+  name             String
+  category         String
+  stock            Int      @default(0)
+  unit             String
+  supplier         String?
+  cost             Float
+  expiryDate       DateTime?
+  location         String?
+}
+
+model LabTest {
+  id          String   @id @default(uuid())
+  orderId     String
+  patientId   String
+  patientName String
+  testName    String
+  orderDate   DateTime @default(now())
+  status      String   @default("Đã chỉ định")
+  results     String?
+  imageUrl    String?
+  aiDiagnosis String?
+}
+
+model RadiologyExam {
+  id          String   @id @default(uuid())
+  orderId     String
+  patientId   String
+  patientName String
+  modality    String
+  orderDate   DateTime @default(now())
+  status      String   @default("Đã chỉ định")
+  report      String?
+  imageUrl    String?
+  aiDiagnosis String?
+}
+
+model FinancialRecord {
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  description String
+  type        String   // "Thu" | "Chi"
+  amount      Float
+}

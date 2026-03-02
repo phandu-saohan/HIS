@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { getDepartmentSuggestion } from '../services/geminiService';
 import { type PortalMessage, type Appointment, type Department } from '../types';
 import Card from './ui/Card';
+import SymptomChecker from './SymptomChecker';
 
 const mockMessages: PortalMessage[] = [
     { id: 'MSG01', patientName: 'Phạm Thị Dung', subject: 'Câu hỏi về đơn thuốc', date: '2024-07-29 10:30', isRead: false },
@@ -70,7 +71,7 @@ const PatientPortal: React.FC<PatientPortalProps> = ({ appointments, onAddAppoin
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* New Messages */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <div className="modern-card p-6">
                     <h3 className="text-lg font-bold mb-4">Tin nhắn mới từ Bệnh nhân</h3>
                     <ul className="space-y-3">
                         {messages.filter(m => !m.isRead).map(message => (
@@ -87,10 +88,10 @@ const PatientPortal: React.FC<PatientPortalProps> = ({ appointments, onAddAppoin
                 </div>
 
                 {/* Upcoming Appointments */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <div className="modern-card p-6">
                     <div className="flex justify-between items-center mb-4">
                          <h3 className="text-lg font-bold">Lịch hẹn sắp tới của bạn</h3>
-                         <button onClick={() => setIsBookingModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm">
+                         <button onClick={() => setIsBookingModalOpen(true)} className="btn-primary flex items-center text-sm">
                             <PlusIcon />
                             <span className="ml-2">Đặt lịch hẹn mới</span>
                          </button>
@@ -115,6 +116,11 @@ const PatientPortal: React.FC<PatientPortalProps> = ({ appointments, onAddAppoin
                     </ul>
                 </div>
             </div>
+
+            <div className="mt-8">
+                <SymptomChecker />
+            </div>
+
             {isBookingModalOpen && (
                 <AppointmentBookingModal
                     appointmentToEdit={appointmentToEdit}

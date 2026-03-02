@@ -1,6 +1,22 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { type Role, type AuditLog, type Permission, type UserRole } from '../types';
 
+// --- ICONS ---
+const ActivityIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
+const MicroscopeIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
+const ReceiptIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>;
+const PackageIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
+const SettingsIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
+const UsersIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.975 5.975 0 0112 13a5.975 5.975 0 013 5.197M15 21a6 6 0 00-9-5.197m0 0A5.975 5.975 0 0112 13a5.975 5.975 0 013 5.197M15 21a6 6 0 00-9-5.197" /></svg>;
+const ChevronDownIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>;
+const CheckCircleIconSolid: React.FC<{className?: string}> = ({className}) => <svg className={className} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>;
+const XCircleIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>;
+const LockClosedIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+const PlusIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
+const PencilIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>;
+const TrashIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
+const ArrowLeftIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>;
+
 const allModules: Record<string, string> = {
     'Bảng điều khiển': 'dashboard', 'Quản lý Bệnh nhân': 'patient', 'Khám ngoại trú': 'opd',
     'Quản lý Nội trú': 'ipd', 'Bệnh án điện tử': 'emr', 'Điều dưỡng (NIS)': 'nis',
@@ -68,23 +84,61 @@ const mockAuditLog: AuditLog[] = [
     { id: 'L04', timestamp: '2024-07-30 08:05:11', user: 'admin', userRole: 'Quản trị Hệ thống', action: 'Đăng nhập Hệ thống', details: 'IP: 192.168.1.10' },
 ];
 
+const CheckCircleIcon: React.FC<{granted: boolean}> = ({ granted }) => granted
+    ? <svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    : <svg className="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+
 type Tab = 'roles' | 'audit';
 type View = 'list' | 'form';
 
 interface SecurityManagementProps {
     currentUserRole: UserRole;
+    roles: Role[];
+    onAddRole: (data: Omit<Role, 'id'>) => void;
+    onUpdateRole: (data: Role) => void;
+    onDeleteRole: (id: string) => void;
+    auditLogs: AuditLog[];
 }
 
-const SecurityManagement: React.FC<SecurityManagementProps> = ({ currentUserRole }) => {
+const moduleIcons: Record<string, React.ReactNode> = {
+    'Lâm sàng & Tổng quan': <ActivityIcon className="w-5 h-5 text-blue-500" />,
+    'Cận Lâm sàng': <MicroscopeIcon className="w-5 h-5 text-indigo-500" />,
+    'Hành chính & Tài chính': <ReceiptIcon className="w-5 h-5 text-amber-500" />,
+    'Hậu cần & Kho': <PackageIcon className="w-5 h-5 text-emerald-500" />,
+    'Quản lý & Vận hành': <SettingsIcon className="w-5 h-5 text-slate-500" />,
+    'Tương tác Bệnh nhân': <UsersIcon className="w-5 h-5 text-purple-500" />
+};
+
+const SecurityManagement: React.FC<SecurityManagementProps> = ({ 
+    currentUserRole, 
+    roles, 
+    onAddRole, 
+    onUpdateRole, 
+    onDeleteRole, 
+    auditLogs 
+}) => {
     const [activeTab, setActiveTab] = useState<Tab>('roles');
     const [view, setView] = useState<View>('list');
-    const [roles, setRoles] = useState<Role[]>(mockRolesData);
-    const [selectedRole, setSelectedRole] = useState<Role | null>(roles[0] || null);
+    const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [roleToEdit, setRoleToEdit] = useState<Role | null>(null);
     const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+
+    useEffect(() => {
+        if (roles.length > 0 && !selectedRole) {
+            setSelectedRole(roles[0]);
+        }
+    }, [roles, selectedRole]);
+    const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
+        'Lâm sàng & Tổng quan': true,
+        'Cận Lâm sàng': true
+    });
     const deleteModalRef = useRef<HTMLDialogElement>(null);
     
     const canManage = currentUserRole === 'Quản trị Hệ thống';
+
+    const toggleCategory = (category: string) => {
+        setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
+    };
 
     const handleAddNew = () => {
         setRoleToEdit(null);
@@ -104,11 +158,10 @@ const SecurityManagement: React.FC<SecurityManagementProps> = ({ currentUserRole
     const handleConfirmDelete = () => {
         if (!roleToDelete) return;
         
-        const newRoles = roles.filter(r => r.id !== roleToDelete.id);
-        setRoles(newRoles);
+        onDeleteRole(roleToDelete.id);
 
         if (selectedRole?.id === roleToDelete.id) {
-            setSelectedRole(newRoles[0] || null);
+            setSelectedRole(roles.find(r => r.id !== roleToDelete.id) || null);
         }
         
         setRoleToDelete(null);
@@ -117,13 +170,9 @@ const SecurityManagement: React.FC<SecurityManagementProps> = ({ currentUserRole
 
     const handleSaveRole = (formData: { name: string; permissions: Record<string, Permission[]> }) => {
         if (roleToEdit) { // Update
-            const updatedRole = { ...roleToEdit, ...formData };
-            setRoles(prev => prev.map(r => r.id === roleToEdit.id ? updatedRole : r));
-            setSelectedRole(updatedRole);
+            onUpdateRole({ ...roleToEdit, ...formData });
         } else { // Add new
-            const newRole: Role = { id: `R${Date.now()}`, ...formData };
-            setRoles(prev => [...prev, newRole]);
-            setSelectedRole(newRole);
+            onAddRole(formData);
         }
         setView('list');
     };
@@ -138,7 +187,7 @@ const SecurityManagement: React.FC<SecurityManagementProps> = ({ currentUserRole
 
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <h2 className="text-2xl font-bold mb-4">Quản lý Phân quyền & Bảo mật</h2>
                 <div className="border-b border-gray-200 dark:border-gray-700">
                     <nav className="-mb-px flex space-x-6">
@@ -153,86 +202,230 @@ const SecurityManagement: React.FC<SecurityManagementProps> = ({ currentUserRole
 
                 {activeTab === 'roles' && (
                     <div className="mt-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-bold">Danh sách Vai trò</h3>
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Vai trò & Phân quyền</h3>
+                                <p className="text-sm text-slate-500">Quản lý các nhóm người dùng và quyền truy cập module</p>
+                            </div>
                             {canManage && (
                                 <button
                                     onClick={handleAddNew}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"
+                                    className="btn-primary flex items-center px-4 py-2.5 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <PlusIcon className="w-5 h-5 mr-2" />
                                     Thêm vai trò mới
                                 </button>
                             )}
                         </div>
-                        <div className="flex gap-6">
-                            <div className="w-1/3">
-                                <ul className="space-y-1 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
-                                    {roles.map(role => (
-                                        <li key={role.id} onClick={() => setSelectedRole(role)} className={`group w-full text-left p-3 rounded-lg text-sm flex justify-between items-center cursor-pointer ${selectedRole?.id === role.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                                            <span>{role.name}</span>
-                                            {canManage && 
-                                                <div className="hidden group-hover:flex items-center space-x-2">
-                                                    <button onClick={(e) => {e.stopPropagation(); handleEdit(role)}}><PencilIcon className="w-4 h-4 text-yellow-500"/></button>
-                                                    <button onClick={(e) => {e.stopPropagation(); handleDelete(role)}}><TrashIcon className="w-4 h-4 text-red-500"/></button>
+                        <div className="flex flex-col lg:flex-row gap-6">
+                            {/* Role List Sidebar */}
+                            <div className="w-full lg:w-1/4">
+                                <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 p-2">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 py-2">Danh sách Vai trò</p>
+                                    <ul className="space-y-1 mt-1">
+                                        {roles.map(role => (
+                                            <li 
+                                                key={role.id} 
+                                                onClick={() => setSelectedRole(role)} 
+                                                className={`group w-full text-left p-3 rounded-xl text-sm flex justify-between items-center cursor-pointer transition-all ${
+                                                    selectedRole?.id === role.id 
+                                                        ? 'bg-blue-600 text-white shadow-md' 
+                                                        : 'hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
+                                                }`}
+                                            >
+                                                <div className="flex items-center">
+                                                    <div className={`w-2 h-2 rounded-full mr-3 ${selectedRole?.id === role.id ? 'bg-white' : 'bg-blue-400 opacity-50'}`}></div>
+                                                    <span className="font-bold">{role.name}</span>
                                                 </div>
-                                            }
-                                        </li>
-                                    ))}
-                                </ul>
+                                                {canManage && 
+                                                    <div className={`flex items-center space-x-1 transition-opacity ${selectedRole?.id === role.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                                        <button 
+                                                            onClick={(e) => {e.stopPropagation(); handleEdit(role)}}
+                                                            className={`p-1.5 rounded-lg transition-colors ${selectedRole?.id === role.id ? 'hover:bg-white/20' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                                        >
+                                                            <PencilIcon className={`w-3.5 h-3.5 ${selectedRole?.id === role.id ? 'text-white' : 'text-slate-400'}`}/>
+                                                        </button>
+                                                        <button 
+                                                            onClick={(e) => {e.stopPropagation(); handleDelete(role)}}
+                                                            className={`p-1.5 rounded-lg transition-colors ${selectedRole?.id === role.id ? 'hover:bg-white/20' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                                        >
+                                                            <TrashIcon className={`w-3.5 h-3.5 ${selectedRole?.id === role.id ? 'text-white' : 'text-red-400'}`}/>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
-                            <div className="w-2/3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+
+                            {/* Permissions Detail View */}
+                            <div className="w-full lg:w-3/4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
                                 {selectedRole ? (
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-4">Quyền của vai trò: <span className="text-blue-600 dark:text-blue-400">{selectedRole.name}</span></h3>
-                                        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                                            {Object.keys(selectedRole.permissions).map((category) => (
-                                                (selectedRole.permissions[category]?.length > 0 && 
-                                                <div key={category}>
-                                                    <h4 className="font-bold text-md mb-2">{category}</h4>
-                                                    <ul className="space-y-2 pl-4">
-                                                        {selectedRole.permissions[category].map(p => (
-                                                            <li key={p.id} className="flex items-center text-sm">
-                                                                <CheckCircleIcon granted={p.granted} />
-                                                                <span className={`${p.granted ? '' : 'text-gray-400'}`}>{p.description}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                                )
-                                            ))}
+                                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                                        <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-100 dark:border-slate-700">
+                                            <div>
+                                                <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                                                    Quyền hạn: <span className="text-blue-600 dark:text-blue-400">{selectedRole.name}</span>
+                                                </h3>
+                                                <p className="text-sm text-slate-500 mt-1">Chi tiết các quyền được cấp cho vai trò này</p>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Trạng thái:</span>
+                                                <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase rounded-lg tracking-wider">Đang hoạt động</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+                                            {Object.entries(moduleCategories).map(([category, modules]) => {
+                                                const isExpanded = expandedCategories[category];
+                                                const grantedCount = modules.reduce((acc, modName) => {
+                                                    return acc + (selectedRole.permissions[modName]?.filter(p => p.granted).length || 0);
+                                                }, 0);
+                                                const totalCount = modules.reduce((acc, modName) => {
+                                                    return acc + (selectedRole.permissions[modName]?.length || 0);
+                                                }, 0);
+
+                                                return (
+                                                    <div key={category} className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all hover:shadow-md">
+                                                        <button 
+                                                            onClick={() => toggleCategory(category)}
+                                                            className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800"
+                                                        >
+                                                            <div className="flex items-center">
+                                                                <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl mr-3">
+                                                                    {moduleIcons[category] || <SettingsIcon className="w-5 h-5" />}
+                                                                </div>
+                                                                <div className="text-left">
+                                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">{category}</h4>
+                                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
+                                                                        {grantedCount}/{totalCount} quyền được cấp
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <ChevronDownIcon className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                                        </button>
+                                                        
+                                                        {isExpanded && (
+                                                            <div className="p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                                                                {modules.map(moduleName => {
+                                                                    const perms = selectedRole.permissions[moduleName] || [];
+                                                                    if (perms.length === 0) return null;
+
+                                                                    return (
+                                                                        <div key={moduleName} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                                                            <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center">
+                                                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></div>
+                                                                                {moduleName}
+                                                                            </h5>
+                                                                            <div className="grid grid-cols-2 gap-2">
+                                                                                {perms.map(p => (
+                                                                                    <div key={p.id} className={`flex items-center p-2 rounded-lg border transition-all ${
+                                                                                        p.granted 
+                                                                                            ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30' 
+                                                                                            : 'bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 opacity-60'
+                                                                                    }`}>
+                                                                                        <div className={`mr-2 flex-shrink-0 ${p.granted ? 'text-emerald-500' : 'text-slate-300'}`}>
+                                                                                            {p.granted ? <CheckCircleIconSolid className="w-4 h-4" /> : <XCircleIcon className="w-4 h-4" />}
+                                                                                        </div>
+                                                                                        <span className={`text-[11px] font-bold leading-tight ${p.granted ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400'}`}>
+                                                                                            {p.description.split(' dữ liệu ')[0]}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
-                                ) : <p>Chọn một vai trò để xem quyền.</p>}
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
+                                        <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-full mb-4">
+                                            <LockClosedIcon className="w-12 h-12 opacity-20" />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-slate-600 dark:text-slate-300">Chưa chọn vai trò</h3>
+                                        <p className="text-sm max-w-xs text-center">Vui lòng chọn một vai trò từ danh sách bên trái để xem và quản lý các quyền hạn chi tiết.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
 
                 {activeTab === 'audit' && (
-                    <div className="mt-6 overflow-x-auto">
-                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3">Thời gian</th>
-                                    <th scope="col" className="px-6 py-3">Người dùng</th>
-                                    <th scope="col" className="px-6 py-3">Vai trò</th>
-                                    <th scope="col" className="px-6 py-3">Hành động</th>
-                                    <th scope="col" className="px-6 py-3">Chi tiết</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {mockAuditLog.map(log => (
-                                    <tr key={log.id} className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
-                                        <td className="px-6 py-4 whitespace-nowrap">{log.timestamp}</td>
-                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{log.user}</td>
-                                        <td className="px-6 py-4">{log.userRole}</td>
-                                        <td className="px-6 py-4 font-semibold">{log.action}</td>
-                                        <td className="px-6 py-4">{log.details}</td>
+                    <div className="mt-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Nhật ký Hoạt động</h3>
+                                <p className="text-sm text-slate-500">Theo dõi các thay đổi và truy cập hệ thống quan trọng</p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <button className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all">
+                                    Xuất báo cáo
+                                </button>
+                                <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 dark:shadow-none">
+                                    Lọc dữ liệu
+                                </button>
+                            </div>
+                        </div>
+                        <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                            <table className="w-full text-sm text-left">
+                                <thead className="text-[10px] text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-4 font-black">Thời gian</th>
+                                        <th scope="col" className="px-6 py-4 font-black">Người dùng</th>
+                                        <th scope="col" className="px-6 py-4 font-black">Vai trò</th>
+                                        <th scope="col" className="px-6 py-4 font-black">Hành động</th>
+                                        <th scope="col" className="px-6 py-4 font-black">Chi tiết</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                                    {auditLogs.map(log => (
+                                        <tr key={log.id} className="bg-white dark:bg-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col">
+                                                    <span className="text-slate-900 dark:text-slate-200 font-bold">{log.timestamp.split(' ')[1]}</span>
+                                                    <span className="text-[10px] text-slate-400">{log.timestamp.split(' ')[0]}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center">
+                                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3 font-black text-xs">
+                                                        {log.user.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className="font-bold text-slate-900 dark:text-white">{log.user}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded-lg uppercase">
+                                                    {log.userRole}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`font-bold ${
+                                                    log.action.includes('Đăng nhập') ? 'text-blue-600' : 
+                                                    log.action.includes('Xóa') ? 'text-red-600' : 
+                                                    log.action.includes('Tạo') ? 'text-emerald-600' : 'text-slate-700 dark:text-slate-300'
+                                                }`}>
+                                                    {log.action}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <p className="text-slate-500 dark:text-slate-400 max-w-xs truncate" title={log.details}>
+                                                    {log.details}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>
@@ -353,7 +546,7 @@ const RoleFormView: React.FC<RoleFormViewProps> = ({ role, onSave, onCancel }) =
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg h-full flex flex-col">
+        <div className="modern-card p-6 h-full flex flex-col">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
                 <div className="flex items-center space-x-4 mb-6">
                     <button type="button" onClick={onCancel} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -434,16 +627,5 @@ const RoleFormView: React.FC<RoleFormViewProps> = ({ role, onSave, onCancel }) =
         </div>
     );
 };
-
-
-// --- ICONS ---
-const CheckCircleIcon: React.FC<{granted: boolean}> = ({ granted }) => granted
-    ? <svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-    : <svg className="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const PlusIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
-const PencilIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>;
-const TrashIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
-const ArrowLeftIcon: React.FC<{className?: string}> = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>;
-
 
 export default SecurityManagement;

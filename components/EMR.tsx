@@ -193,7 +193,7 @@ const EMR: React.FC<EMRProps> = ({ currentUserRole }) => {
                     </ul>
                 </div>
             </div>
-            <div className="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col overflow-y-hidden">
+            <div className="md:col-span-2 modern-card p-6 flex flex-col overflow-y-hidden">
                 {selectedPatient ? (
                    <EMRDetailView
                         key={selectedPatient.id}

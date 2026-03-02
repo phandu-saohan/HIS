@@ -192,7 +192,7 @@ const Telemedicine: React.FC<TelemedicineProps> = ({ sessions, onUpdateSession }
         <div>
             <h2 className="text-2xl font-bold mb-6">Y tế từ xa (Telemedicine)</h2>
             
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
+            <div className="modern-card p-6 mb-6">
                 <h3 className="text-lg font-bold mb-4">Lịch khám Hôm nay</h3>
                 <div className="space-y-4">
                     {upcomingSessions.map(session => (
@@ -211,7 +211,7 @@ const Telemedicine: React.FC<TelemedicineProps> = ({ sessions, onUpdateSession }
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <h3 className="text-lg font-bold mb-4">Lịch sử Cuộc gọi</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">

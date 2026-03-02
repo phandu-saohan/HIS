@@ -26,7 +26,7 @@ const FinancialLedger: React.FC<FinancialLedgerProps> = ({ records }) => {
                 <Card title="Tổng chi" value={totalExpense.toLocaleString('vi-VN') + ' VND'} icon={<ArrowDownIcon />} color="bg-red-100 dark:bg-red-900 text-red-500" />
                 <Card title="Số dư" value={balance.toLocaleString('vi-VN') + ' VND'} icon={<ScaleIcon />} color="bg-blue-100 dark:bg-blue-900 text-blue-500" />
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <h3 className="text-lg font-bold mb-4">Lịch sử Giao dịch</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">

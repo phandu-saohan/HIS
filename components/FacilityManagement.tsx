@@ -27,10 +27,19 @@ const mockDepartments: Department[] = [
 
 interface FacilityManagementProps {
     currentUserRole: UserRole;
+    departments: Department[];
+    onAddDepartment: (data: Omit<Department, 'id'>) => void;
+    onUpdateDepartment: (data: Department) => void;
+    onDeleteDepartment: (id: string) => void;
 }
 
-const FacilityManagement: React.FC<FacilityManagementProps> = ({ currentUserRole }) => {
-    const [departments, setDepartments] = useState<Department[]>(mockDepartments);
+const FacilityManagement: React.FC<FacilityManagementProps> = ({ 
+    currentUserRole, 
+    departments,
+    onAddDepartment,
+    onUpdateDepartment,
+    onDeleteDepartment
+}) => {
     const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
     const [departmentToEdit, setDepartmentToEdit] = useState<Department | null>(null);
     const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
@@ -66,24 +75,23 @@ const FacilityManagement: React.FC<FacilityManagementProps> = ({ currentUserRole
 
     const handleSaveDepartment = (formData: Omit<Department, 'id' | 'rooms'>) => {
         if (departmentToEdit) { // Edit mode
-            setDepartments(deps => deps.map(d => d.id === departmentToEdit.id ? { ...departmentToEdit, ...formData } : d));
+            onUpdateDepartment({ ...departmentToEdit, ...formData });
         } else { // Add mode
-            const newDept: Department = { id: `DEPT${Date.now()}`, ...formData, rooms: [] };
-            setDepartments(deps => [newDept, ...deps]);
+            onAddDepartment({ ...formData, rooms: [] });
         }
         deptModalRef.current?.close();
     }
 
     const handleConfirmDelete = () => {
         if (departmentToDelete) {
-            setDepartments(deps => deps.filter(d => d.id !== departmentToDelete.id));
+            onDeleteDepartment(departmentToDelete.id);
             deleteModalRef.current?.close();
         }
     }
 
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Quản lý Khoa & Cơ sở vật chất</h2>
                     {canManage && (
@@ -123,7 +131,7 @@ const FacilityManagement: React.FC<FacilityManagementProps> = ({ currentUserRole
             </div>
             {/* Manage Rooms Modal */}
             <dialog ref={roomModalRef} className="rounded-lg shadow-xl p-0 w-full max-w-2xl bg-white dark:bg-gray-800 backdrop:bg-black backdrop:bg-opacity-50">
-                {selectedDepartment && <RoomManager department={selectedDepartment} setDepartments={setDepartments} canManage={canManage} onClose={() => roomModalRef.current?.close()} />}
+                {selectedDepartment && <RoomManager department={selectedDepartment} onUpdateDepartment={onUpdateDepartment} canManage={canManage} onClose={() => roomModalRef.current?.close()} />}
             </dialog>
             {/* Add/Edit Department Modal */}
             <dialog ref={deptModalRef} className="rounded-lg shadow-xl p-0 w-full max-w-md bg-white dark:bg-gray-800 backdrop:bg-black backdrop:bg-opacity-50">
@@ -153,36 +161,28 @@ const FacilityManagement: React.FC<FacilityManagementProps> = ({ currentUserRole
 };
 
 // RoomManager sub-component
-const RoomManager: React.FC<{ department: Department, setDepartments: React.Dispatch<React.SetStateAction<Department[]>>, canManage: boolean, onClose: () => void }> = ({ department, setDepartments, canManage, onClose }) => {
+const RoomManager: React.FC<{ 
+    department: Department, 
+    onUpdateDepartment: (data: Department) => void, 
+    canManage: boolean, 
+    onClose: () => void 
+}> = ({ department, onUpdateDepartment, canManage, onClose }) => {
     const [roomToEdit, setRoomToEdit] = useState<Partial<ExaminationRoom> | null>(null);
 
     const handleSaveRoom = (roomData: Omit<ExaminationRoom, 'id'>) => {
-        setDepartments(prevDepts => {
-            return prevDepts.map(d => {
-                if (d.id === department.id) {
-                    let newRooms;
-                    if (roomToEdit?.id) { // Edit existing room
-                        newRooms = d.rooms.map(r => r.id === roomToEdit.id ? { ...r, ...roomData } : r);
-                    } else { // Add new room
-                        newRooms = [...d.rooms, { id: `R${Date.now()}`, ...roomData }];
-                    }
-                    return { ...d, rooms: newRooms };
-                }
-                return d;
-            });
-        });
+        let newRooms;
+        if (roomToEdit?.id) { // Edit existing room
+            newRooms = department.rooms.map(r => r.id === roomToEdit.id ? { ...r, ...roomData } : r);
+        } else { // Add new room
+            newRooms = [...department.rooms, { id: `R${Date.now()}`, ...roomData }];
+        }
+        onUpdateDepartment({ ...department, rooms: newRooms });
         setRoomToEdit(null); // Close the form
     };
 
     const handleDeleteRoom = (roomId: string) => {
-         setDepartments(prevDepts => {
-            return prevDepts.map(d => {
-                if (d.id === department.id) {
-                    return { ...d, rooms: d.rooms.filter(r => r.id !== roomId) };
-                }
-                return d;
-            });
-        });
+        const newRooms = department.rooms.filter(r => r.id !== roomId);
+        onUpdateDepartment({ ...department, rooms: newRooms });
     }
 
     return (

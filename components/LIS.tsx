@@ -54,11 +54,11 @@ const LIS: React.FC<LISProps> = ({ labTests, onUpdateLabTest, onAddLabTest, onDe
 
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div className="modern-card p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Hệ thống thông tin Xét nghiệm (LIS)</h2>
                     {canManage && (
-                        <button onClick={() => handleOpenModal(null)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                        <button onClick={() => handleOpenModal(null)} className="btn-primary flex items-center">
                             <PlusIcon /> <span className="ml-2">Thêm mới</span>
                         </button>
                     )}

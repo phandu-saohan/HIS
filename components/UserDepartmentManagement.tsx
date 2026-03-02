@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { type UserRole, type User } from '../types';
+import { type UserRole, type Staff, type Department } from '../types';
 import { mockUsers } from '../data/mockData';
 import { Search, Plus, Edit, Trash2, Shield, Users, Building2, CheckCircle, XCircle, X } from 'lucide-react';
 
@@ -40,9 +40,21 @@ type Tab = 'users' | 'departments' | 'roles';
 
 interface UserDepartmentManagementProps {
   currentUserRole: UserRole;
+  users: Staff[];
+  departments: Department[];
+  onAddUser: (data: Omit<Staff, 'id'>) => void;
+  onUpdateUser: (data: Staff) => void;
+  onDeleteUser: (id: string) => void;
 }
 
-const UserDepartmentManagement: React.FC<UserDepartmentManagementProps> = ({ currentUserRole }) => {
+const UserDepartmentManagement: React.FC<UserDepartmentManagementProps> = ({ 
+  currentUserRole,
+  users,
+  departments,
+  onAddUser,
+  onUpdateUser,
+  onDeleteUser
+}) => {
   const [activeTab, setActiveTab] = useState<Tab>('users');
   
   // Check if user has permission to view/edit this module
@@ -59,7 +71,7 @@ const UserDepartmentManagement: React.FC<UserDepartmentManagementProps> = ({ cur
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+    <div className="modern-card p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
           <Shield className="w-6 h-6 mr-2 text-blue-600" />
@@ -106,56 +118,53 @@ const UserDepartmentManagement: React.FC<UserDepartmentManagementProps> = ({ cur
       </div>
 
       <div>
-        {activeTab === 'users' && <UsersTab />}
-        {activeTab === 'departments' && <DepartmentsTab />}
+        {activeTab === 'users' && <UsersTab users={users} departments={departments} onAdd={onAddUser} onUpdate={onUpdateUser} onDelete={onDeleteUser} />}
+        {activeTab === 'departments' && <DepartmentsTab departments={departments} users={users} />}
         {activeTab === 'roles' && <RolesTab />}
       </div>
     </div>
   );
 };
 
-const UsersTab: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+const UsersTab: React.FC<{ 
+  users: Staff[], 
+  departments: Department[],
+  onAdd: (data: Omit<Staff, 'id'>) => void,
+  onUpdate: (data: Staff) => void,
+  onDelete: (id: string) => void
+}> = ({ users, departments, onAdd, onUpdate, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<Staff | null>(null);
 
-  const [formData, setFormData] = useState<Partial<User>>({
-    username: '',
-    fullName: '',
+  const [formData, setFormData] = useState<Partial<Staff>>({
+    name: '',
     email: '',
-    phone: '',
-    role: VN_HEALTHCARE_ROLES[0],
-    departmentId: VN_HEALTHCARE_DEPARTMENTS[0].id,
-    status: 'Hoạt động'
+    contact: '',
+    role: 'Bác sĩ/Y sĩ',
+    status: 'Online'
   });
 
   const filteredUsers = useMemo(() => {
     return users.filter(u => 
-      u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       u.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [users, searchTerm]);
 
-  const getDepartmentName = (deptId: string) => {
-    return VN_HEALTHCARE_DEPARTMENTS.find(d => d.id === deptId)?.name || 'Không xác định';
-  };
-
-  const handleOpenModal = (user?: User) => {
+  const handleOpenModal = (user?: Staff) => {
     if (user) {
       setEditingUser(user);
       setFormData(user);
     } else {
       setEditingUser(null);
       setFormData({
-        username: '',
-        fullName: '',
+        name: '',
         email: '',
-        phone: '',
-        role: VN_HEALTHCARE_ROLES[0],
-        departmentId: VN_HEALTHCARE_DEPARTMENTS[0].id,
-        status: 'Hoạt động'
+        contact: '',
+        role: 'Bác sĩ/Y sĩ',
+        qualifications: '',
+        status: 'Online'
       });
     }
     setIsModalOpen(true);
@@ -169,14 +178,9 @@ const UsersTab: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } as User : u));
+      onUpdate({ ...editingUser, ...formData } as Staff);
     } else {
-      const newUser: User = {
-        ...formData,
-        id: `U${Date.now()}`,
-        lastLogin: 'Chưa đăng nhập'
-      } as User;
-      setUsers([...users, newUser]);
+      onAdd(formData as Omit<Staff, 'id'>);
     }
     handleCloseModal();
   };
@@ -207,12 +211,10 @@ const UsersTab: React.FC = () => {
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th className="px-6 py-3">Tài khoản</th>
               <th className="px-6 py-3">Họ và tên</th>
               <th className="px-6 py-3">Vai trò</th>
-              <th className="px-6 py-3">Khoa/Phòng</th>
+              <th className="px-6 py-3">Trình độ/Chuyên môn</th>
               <th className="px-6 py-3">Trạng thái</th>
-              <th className="px-6 py-3">Đăng nhập cuối</th>
               <th className="px-6 py-3 text-center">Thao tác</th>
             </tr>
           </thead>
@@ -220,28 +222,26 @@ const UsersTab: React.FC = () => {
             {filteredUsers.map((user) => (
               <tr key={user.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td className="px-6 py-4">
-                  <div className="font-medium text-gray-900 dark:text-white">{user.username}</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{user.name}</div>
                   <div className="text-xs text-gray-500">{user.email}</div>
                 </td>
-                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{user.fullName}</td>
                 <td className="px-6 py-4">
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
                     {user.role}
                   </span>
                 </td>
-                <td className="px-6 py-4">{getDepartmentName(user.departmentId)}</td>
+                <td className="px-6 py-4">{user.qualifications}</td>
                 <td className="px-6 py-4">
-                  {user.status === 'Hoạt động' ? (
+                  {user.status === 'Online' ? (
                     <span className="flex items-center text-green-600 text-sm font-medium">
-                      <CheckCircle className="w-4 h-4 mr-1" /> Hoạt động
+                      <CheckCircle className="w-4 h-4 mr-1" /> Online
                     </span>
                   ) : (
-                    <span className="flex items-center text-red-600 text-sm font-medium">
-                      <XCircle className="w-4 h-4 mr-1" /> Đã khóa
+                    <span className="flex items-center text-gray-500 text-sm font-medium">
+                      <XCircle className="w-4 h-4 mr-1" /> Offline
                     </span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-gray-500">{user.lastLogin}</td>
                 <td className="px-6 py-4 flex justify-center space-x-2">
                   <button 
                     onClick={() => handleOpenModal(user)}
@@ -251,9 +251,9 @@ const UsersTab: React.FC = () => {
                     <Edit className="w-5 h-5" />
                   </button>
                   <button 
-                    onClick={() => setUsers(users.filter(u => u.id !== user.id))}
-                    className="text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-red-400" 
-                    title="Khóa/Xóa"
+                    onClick={() => { if(window.confirm('Xóa người dùng này?')) onDelete(user.id); }}
+                    className="text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-blue-400" 
+                    title="Xóa"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -279,22 +279,12 @@ const UsersTab: React.FC = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tài khoản</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và tên</label>
                   <input
                     type="text"
                     required
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -313,8 +303,8 @@ const UsersTab: React.FC = () => {
                   <input
                     type="tel"
                     required
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    value={formData.contact}
+                    onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                     className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -322,35 +312,35 @@ const UsersTab: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vai trò</label>
                   <select
                     value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value as Staff['role'] })}
                     className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    {VN_HEALTHCARE_ROLES.map(role => (
-                      <option key={role} value={role}>{role}</option>
-                    ))}
+                    <option value="Bác sĩ/Y sĩ">Bác sĩ/Y sĩ</option>
+                    <option value="Điều dưỡng">Điều dưỡng</option>
+                    <option value="Kỹ thuật viên">Kỹ thuật viên</option>
+                    <option value="Nhân viên Viện phí/Kế toán">Nhân viên Viện phí/Kế toán</option>
+                    <option value="Quản trị Hệ thống">Quản trị Hệ thống</option>
+                    <option value="Nhân viên Nhân sự (HR)">Nhân viên Nhân sự (HR)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Khoa / Phòng ban</label>
-                  <select
-                    value={formData.departmentId}
-                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trình độ/Chuyên môn</label>
+                  <input
+                    type="text"
+                    value={formData.qualifications}
+                    onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
                     className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {VN_HEALTHCARE_DEPARTMENTS.map(dept => (
-                      <option key={dept.id} value={dept.id}>{dept.name}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trạng thái</label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Hoạt động' | 'Khóa' })}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Online' | 'Offline' })}
                     className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="Hoạt động">Hoạt động</option>
-                    <option value="Khóa">Khóa</option>
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
                   </select>
                 </div>
               </div>
@@ -377,15 +367,15 @@ const UsersTab: React.FC = () => {
   );
 };
 
-const DepartmentsTab: React.FC = () => {
+const DepartmentsTab: React.FC<{ departments: Department[], users: Staff[] }> = ({ departments, users }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredDepts = useMemo(() => {
-    return VN_HEALTHCARE_DEPARTMENTS.filter(d => 
+    return departments.filter(d => 
       d.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       d.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [departments, searchTerm]);
 
   const getTypeColor = (type: string) => {
     switch(type) {
@@ -428,12 +418,12 @@ const DepartmentsTab: React.FC = () => {
               </div>
             </div>
             <div className="mt-4 flex justify-between items-center">
-              <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${getTypeColor(dept.type)}`}>
-                {dept.type}
+              <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${getTypeColor(dept.type || 'Chức năng')}`}>
+                {dept.type || 'Chức năng'}
               </span>
               <span className="text-sm text-gray-500 flex items-center">
                 <Users className="w-4 h-4 mr-1" />
-                {mockUsers.filter(u => u.departmentId === dept.id).length} nhân sự
+                {users.filter(u => u.department === dept.id || u.department === dept.name).length} nhân sự
               </span>
             </div>
           </div>

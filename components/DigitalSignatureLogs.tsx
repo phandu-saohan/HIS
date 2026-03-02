@@ -15,7 +15,7 @@ const DigitalSignatureLogs: React.FC = () => {
     const relatedLogs = mockSignatureLogs.filter(log => log.versionId === selectedVersionId);
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">

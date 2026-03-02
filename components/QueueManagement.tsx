@@ -26,7 +26,7 @@ const QueueManagement: React.FC<QueueManagementProps> = ({ queueTickets, departm
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold">Quản lý Hàng chờ</h2>
                 <div className="flex items-center space-x-4">

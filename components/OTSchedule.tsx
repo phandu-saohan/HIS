@@ -8,7 +8,7 @@ const mockSurgeries = [
 
 const OTSchedule: React.FC = () => {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="modern-card p-6">
             <h2 className="text-2xl font-bold mb-4 flex items-center">
                 <ClockIcon />
                 <span className="ml-3">Lịch Phòng mổ (OT)</span>

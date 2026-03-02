@@ -23,7 +23,7 @@ const QualityManagement: React.FC = () => {
         <div>
             <h2 className="text-2xl font-bold mb-6">Quản lý Chất lượng Bệnh viện</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <div className="modern-card p-6">
                     <h3 className="font-bold text-lg mb-4">Đánh giá Hài lòng Người bệnh</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
@@ -47,7 +47,7 @@ const QualityManagement: React.FC = () => {
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <div className="modern-card p-6">
                     <h3 className="font-bold text-lg mb-4">Thời gian chờ trung bình theo Khoa</h3>
                      <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={waitTimeData} layout="vertical">
